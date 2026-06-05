@@ -71,6 +71,27 @@ export function googleFontsHref(value: string): string {
   return `https://fonts.googleapis.com/css2?family=${encodedFamily}${weightParam}&display=swap`;
 }
 
+export function extractGoogleFontUrl(css: string): string | undefined {
+  const preferredFormatMatch = css.match(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)\s*format\('(truetype|opentype|woff2?|woff)'\)/);
+  if (preferredFormatMatch?.[1]) return preferredFormatMatch[1];
+
+  return css.match(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)/)?.[1];
+}
+
+export async function fetchGoogleFontBytes(value: string): Promise<Uint8Array | undefined> {
+  const cssResponse = await fetch(googleFontsHref(value));
+  if (!cssResponse.ok) return undefined;
+
+  const css = await cssResponse.text();
+  const fontUrl = extractGoogleFontUrl(css);
+  if (!fontUrl) return undefined;
+
+  const fontResponse = await fetch(fontUrl);
+  if (!fontResponse.ok) return undefined;
+
+  return new Uint8Array(await fontResponse.arrayBuffer());
+}
+
 export function hexToPdfRgb(value: string): RGB {
   const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(value.trim());
   if (!match) return rgb(0.12, 0.13, 0.14);

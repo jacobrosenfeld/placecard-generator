@@ -6,10 +6,11 @@ import {
   popGraphicsState,
   pushGraphicsState
 } from "pdf-lib";
+import fontkit from "@pdf-lib/fontkit";
 import type { CardLayout, GuestRow, LogoSettings, OutputMode, ProjectSettings, Rect, TextStyle } from "@/types/placecard";
 import { buildCardLayout, insetRect } from "./layoutEngine";
 import { fitTextToBox } from "./textFit";
-import { getCuratedFont, hexToPdfRgb } from "./typography";
+import { fetchGoogleFontBytes, getCuratedFont, hexToPdfRgb } from "./typography";
 import { formatInchesFromPoints } from "./units";
 
 type GeneratePdfInput = {
@@ -122,6 +123,17 @@ function drawCenteredContent(params: {
 }
 
 async function embedStyleFont(pdfDoc: PDFDocument, style: TextStyle) {
+  if (style.fontMode === "google") {
+    try {
+      const fontBytes = await fetchGoogleFontBytes(style.googleFontFamily);
+      if (fontBytes) {
+        return pdfDoc.embedFont(fontBytes, { subset: true });
+      }
+    } catch {
+      // Keep PDF export available if a remote font cannot be fetched or parsed.
+    }
+  }
+
   const curatedFont = getCuratedFont(style.fontFamily);
   const standardFont = style.fontWeight === "bold" ? curatedFont.pdfBold : curatedFont.pdfRegular;
 
@@ -183,6 +195,7 @@ function drawProofGuides(
 export async function generatePlacecardPdf({ settings, guests, outputMode }: GeneratePdfInput): Promise<Uint8Array> {
   const layout = buildCardLayout(settings);
   const pdfDoc = await PDFDocument.create();
+  pdfDoc.registerFontkit(fontkit);
   const regularFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
   const nameFont = await embedStyleFont(pdfDoc, settings.nameText);
   const tableFont = await embedStyleFont(pdfDoc, settings.tableText);
