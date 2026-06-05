@@ -110,6 +110,7 @@ Status of tracked issues (closed = implemented):
 - [#18 Include font name, CMYK values, and font size in Proof PDF (metadata)](https://github.com/jacobrosenfeld/placecard-generator/issues/18) — Closed
 - [#19 Timestamp exported PDF filenames (proof & print-ready) using user's local date/time](https://github.com/jacobrosenfeld/placecard-generator/issues/19) — Closed
 - [#20 Add export option: sort PDFs by table number or guest last name (with name parsing)](https://github.com/jacobrosenfeld/placecard-generator/issues/20) — Closed
+- [#21 the fold line is missing on the inside of the card](https://github.com/jacobrosenfeld/placecard-generator/issues/21) — Closed
 
 If you'd like any of the remaining open issues closed or need follow-ups, tell me which ones and I'll either close them or ask for clarification.
 

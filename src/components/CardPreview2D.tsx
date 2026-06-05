@@ -47,9 +47,9 @@ export function CardPreview2D({
                 color={textColorToPreviewHex(settings.nameText.color)}
                 uppercase={settings.nameText.uppercase}
                 smallCaps={settings.nameText.smallCaps}
-                className="border-t border-dashed border-brass"
               />
             </div>
+            <FoldGuide />
           </div>
         </div>
         <div
@@ -72,14 +72,24 @@ export function CardPreview2D({
                 color={textColorToPreviewHex(settings.tableText.color)}
                 uppercase={settings.tableText.uppercase}
                 smallCaps={settings.tableText.smallCaps}
-                className="rotate-180 border-b border-dashed border-brass"
+                className="rotate-180"
               />
               <BlankHalf label="Blank bottom" />
             </div>
+            <FoldGuide />
           </div>
         </div>
       </div>
     </div>
+  );
+}
+
+function FoldGuide() {
+  return (
+    <div
+      aria-hidden="true"
+      className="pointer-events-none absolute left-0 top-1/2 z-10 w-full -translate-y-px border-t border-dashed border-brass"
+    />
   );
 }
 

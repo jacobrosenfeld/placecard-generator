@@ -34,15 +34,9 @@ export default function Home() {
           </div>
         </div>
         <div className="self-center border border-line bg-white p-5 shadow-tool">
-          <div className="aspect-[3.5/4] border border-dashed border-brass bg-paper p-4">
-            <div className="grid h-full grid-rows-2">
-              <div className="flex rotate-180 items-center justify-center border-b border-dashed border-brass text-center text-2xl font-semibold">
-                Guest Name
-              </div>
-              <div className="flex items-center justify-center text-center text-lg">
-                Table 12
-              </div>
-            </div>
+          <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
+            <HomeImposedSide label="Side 1" top="Blank top" bottom="Guest Name" />
+            <HomeImposedSide label="Side 2" top="Table 12" bottom="Blank bottom" rotateTop />
           </div>
           <div className="mt-4 grid grid-cols-2 gap-3 text-sm text-neutral-700">
             <span className="flex items-center gap-2">
@@ -55,5 +49,40 @@ export default function Home() {
         </div>
       </section>
     </main>
+  );
+}
+
+function HomeImposedSide({
+  label,
+  top,
+  bottom,
+  rotateTop = false
+}: {
+  label: string;
+  top: string;
+  bottom: string;
+  rotateTop?: boolean;
+}) {
+  return (
+    <div className="border border-ink bg-paper p-3">
+      <div className="mb-2 flex items-center justify-between text-[10px] font-semibold uppercase tracking-wide text-neutral-500">
+        <span>{label}</span>
+        <span>3.5 in x 4 in</span>
+      </div>
+      <div className="relative aspect-[3.5/4] border border-dashed border-brass bg-white">
+        <div className="grid h-full grid-rows-2">
+          <div className="flex items-center justify-center px-4 text-center text-lg font-semibold text-ink">
+            <span className={rotateTop ? "rotate-180" : ""}>{top}</span>
+          </div>
+          <div className="flex items-center justify-center px-4 text-center text-lg font-semibold text-ink">
+            <span>{bottom}</span>
+          </div>
+        </div>
+        <div
+          aria-hidden="true"
+          className="pointer-events-none absolute left-0 top-1/2 w-full -translate-y-px border-t border-dashed border-brass"
+        />
+      </div>
+    </div>
   );
 }
