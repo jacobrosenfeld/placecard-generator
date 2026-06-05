@@ -1,20 +1,28 @@
 import { APP_VERSION, GITHUB_REPO_URL } from "@/lib/appInfo";
 
 export function SiteFooter() {
+  const year = new Date().getFullYear();
+
   return (
     <footer className="border-t border-line bg-white/82 px-4 py-4 text-sm text-neutral-600 md:px-6">
-      <div className="mx-auto flex max-w-7xl flex-wrap items-center justify-between gap-3">
-        <span className="font-medium">Placecard Generator v{APP_VERSION}</span>
+      <div className="mx-auto grid max-w-7xl items-center gap-3 text-center md:grid-cols-3">
+        <div className="flex justify-center md:justify-start">
+          <span className="rounded border border-line bg-paper px-2 py-1 font-mono text-xs font-semibold text-ink">
+            app_version: {APP_VERSION}
+          </span>
+        </div>
+        <p className="font-medium text-ink">Made with ❤️ in Teaneck, NJ</p>
         <a
           href={GITHUB_REPO_URL}
           target="_blank"
           rel="noreferrer"
-          className="inline-flex items-center gap-2 rounded-md px-2 py-1 font-semibold text-forest transition hover:bg-paper hover:text-ink"
+          className="inline-flex items-center justify-center gap-2 rounded-md px-2 py-1 font-semibold text-forest transition hover:bg-paper hover:text-ink md:justify-self-end"
           aria-label="Open the Placecard Generator GitHub repository"
         >
           <GitHubMark />
           GitHub
         </a>
+        <p className="text-xs font-medium text-neutral-500 md:col-start-2">© {year} JJA</p>
       </div>
     </footer>
   );
