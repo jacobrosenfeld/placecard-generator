@@ -1,6 +1,7 @@
 "use client";
 
 import { Download } from "lucide-react";
+import { buildPdfFilename } from "@/lib/exportFilenames";
 import { generatePlacecardPdf } from "@/lib/pdfGenerator";
 import type { GuestRow, OutputMode, ProjectSettings } from "@/types/placecard";
 
@@ -24,7 +25,7 @@ export function GeneratePdfButton({
         const url = URL.createObjectURL(blob);
         const link = document.createElement("a");
         link.href = url;
-        link.download = `${settings.projectName || "placecards"}-${outputMode}.pdf`;
+        link.download = buildPdfFilename(settings.projectName, outputMode);
         link.click();
         URL.revokeObjectURL(url);
       }}

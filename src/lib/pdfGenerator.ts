@@ -11,7 +11,8 @@ import { buildCardLayout, insetRect } from "./layoutEngine";
 import { fitTextToBox } from "./textFit";
 import { createTextRenderer } from "./pdfTextRenderer";
 import type { PdfTextRenderer } from "./pdfTextRenderer";
-import { textColorToPdfCmyk } from "./color";
+import { isCmykColor, textColorToCmykChannels, textColorToPdfCmyk, textColorToPreviewHex } from "./color";
+import { FONT_WEIGHT_LABELS, getCuratedFont, normalizeFontWeight } from "./typography";
 import { formatInchesFromPoints } from "./units";
 
 type GeneratePdfInput = {
@@ -40,6 +41,89 @@ async function embedLogo(pdfDoc: PDFDocument, logo?: LogoSettings) {
 
 function textX(panel: Rect, lineWidth: number): number {
   return panel.x + (panel.width - lineWidth) / 2;
+}
+
+function formatNumber(value: number): string {
+  return Number.isInteger(value) ? String(value) : value.toFixed(2).replace(/0+$/g, "").replace(/\.$/g, "");
+}
+
+function formatCmykText(color: TextStyle["color"]): string {
+  const channels = textColorToCmykChannels(color);
+  const cmykText = `C${formatNumber(channels.c)} M${formatNumber(channels.m)} Y${formatNumber(channels.y)} K${formatNumber(channels.k)}`;
+
+  if (isCmykColor(color)) return cmykText;
+
+  return `${cmykText} from ${textColorToPreviewHex(color)}`;
+}
+
+function formatTextStyleMetadata(label: string, style: TextStyle): string {
+  const curatedFont = getCuratedFont(style.fontFamily);
+  const fontWeight = normalizeFontWeight(curatedFont.id, style.fontWeight);
+  const weightLabel = FONT_WEIGHT_LABELS[fontWeight];
+
+  return [
+    `${label}: ${curatedFont.label} ${weightLabel}`,
+    `${formatNumber(style.fontSize)}pt`,
+    `min ${formatNumber(style.minFontSize)}pt`,
+    `${style.maxLines} max line${style.maxLines === 1 ? "" : "s"}`,
+    `uppercase ${style.uppercase ? "yes" : "no"}`,
+    `color ${formatCmykText(style.color)}`
+  ].join(" | ");
+}
+
+function printableProofText(value: string): string {
+  return value.replace(/[^\x20-\x7e]/g, "?");
+}
+
+function wrapProofLine(line: string, maxLength: number): string[] {
+  const words = printableProofText(line).split(/\s+/);
+  const lines: string[] = [];
+  let currentLine = "";
+
+  words.forEach((word) => {
+    if (!word) return;
+
+    if (word.length > maxLength) {
+      if (currentLine) lines.push(currentLine);
+      for (let index = 0; index < word.length; index += maxLength) {
+        lines.push(word.slice(index, index + maxLength));
+      }
+      currentLine = "";
+      return;
+    }
+
+    const nextLine = currentLine ? `${currentLine} ${word}` : word;
+    if (nextLine.length > maxLength) {
+      lines.push(currentLine);
+      currentLine = word;
+      return;
+    }
+
+    currentLine = nextLine;
+  });
+
+  if (currentLine) lines.push(currentLine);
+
+  return lines.length ? lines : [""];
+}
+
+export function proofMetadataLines(settings: ProjectSettings, layout: CardLayout): string[] {
+  const lines = [
+    "Proof PDF metadata",
+    `Project: ${settings.projectName || "Untitled"}${settings.clientName ? ` | Client: ${settings.clientName}` : ""}`,
+    `Flat page: ${formatInchesFromPoints(layout.flatWidthPt)} x ${formatInchesFromPoints(layout.flatHeightPt)} | Finished folded: ${formatInchesFromPoints(layout.finishedWidthPt)} x ${formatInchesFromPoints(layout.finishedHeightPt)}`,
+    `Safe margin: ${formatInchesFromPoints(layout.safeMarginPt)} | Bleed: ${formatInchesFromPoints(layout.bleedPt)}`,
+    formatTextStyleMetadata("Name text", settings.nameText),
+    formatTextStyleMetadata("Table text", settings.tableText)
+  ];
+
+  if (settings.includeLogo && settings.logo) {
+    lines.push(
+      `Logo: ${settings.logo.fileName} | Placement: ${settings.logo.placement} | Max width ${formatNumber(settings.logo.maxWidthPercent)}% | Max height ${formatNumber(settings.logo.maxHeightPercent)}%`
+    );
+  }
+
+  return lines;
 }
 
 export function panelRotationMatrix(panel: Rect, rotation: 0 | 180): [number, number, number, number, number, number] {
@@ -167,6 +251,36 @@ function drawProofGuides(
   });
 }
 
+function drawProofMetadataPage(
+  pdfDoc: PDFDocument,
+  settings: ProjectSettings,
+  layout: CardLayout,
+  font: Awaited<ReturnType<PDFDocument["embedFont"]>>
+) {
+  const page = pdfDoc.addPage([layout.flatWidthPt, layout.flatHeightPt]);
+  const pageMargin = 18;
+  const maxLineLength = 108;
+  const lineHeight = 10;
+  let y = layout.flatHeightPt - pageMargin - 8;
+
+  proofMetadataLines(settings, layout).forEach((line, index) => {
+    const wrappedLines = wrapProofLine(line, maxLineLength);
+
+    wrappedLines.forEach((wrappedLine) => {
+      page.drawText(wrappedLine.trim(), {
+        x: pageMargin,
+        y,
+        size: index === 0 ? 9 : 7,
+        font,
+        color: cmyk(0, 0, 0, index === 0 ? 0.85 : 0.65)
+      });
+      y -= lineHeight;
+    });
+
+    if (index === 0) y -= 2;
+  });
+}
+
 export async function generatePlacecardPdf({ settings, guests, outputMode }: GeneratePdfInput): Promise<Uint8Array> {
   const layout = buildCardLayout(settings);
   const pdfDoc = await PDFDocument.create();
@@ -225,6 +339,10 @@ export async function generatePlacecardPdf({ settings, guests, outputMode }: Gen
       });
     }
   });
+
+  if (outputMode === "proof") {
+    drawProofMetadataPage(pdfDoc, settings, layout, regularFont);
+  }
 
   return pdfDoc.save();
 }

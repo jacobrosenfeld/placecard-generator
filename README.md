@@ -36,6 +36,10 @@ This project is open source under the MIT License.
   operators for text and proof-guide drawing. Legacy hex color state is
   converted internally for compatibility. Uploaded raster logos are embedded as
   provided.
+- Adds a final metadata page to Proof PDFs with the exact typography, CMYK
+  color, safe margin, bleed, and layout settings used for the export.
+- Exports Proof and Print-Ready PDFs with local timestamped filenames in the
+  `MM.DD.YY hhmm am/pm` format.
 
 ## Local Development
 
@@ -96,6 +100,8 @@ Status of tracked issues (closed = implemented):
 - [#15 Add GitHub repo link to footer](https://github.com/jacobrosenfeld/placecard-generator/issues/15) — Closed
 - [#16 Add CMYK color options](https://github.com/jacobrosenfeld/placecard-generator/issues/16) — Closed
 - [#17 Generate PDFs using CMYK output](https://github.com/jacobrosenfeld/placecard-generator/issues/17) — Closed
+- [#18 Include font name, CMYK values, and font size in Proof PDF (metadata)](https://github.com/jacobrosenfeld/placecard-generator/issues/18) — Closed
+- [#19 Timestamp exported PDF filenames (proof & print-ready) using user's local date/time](https://github.com/jacobrosenfeld/placecard-generator/issues/19) — Closed
 
 If you'd like any of the remaining open issues closed or need follow-ups, tell me which ones and I'll either close them or ask for clarification.
 
