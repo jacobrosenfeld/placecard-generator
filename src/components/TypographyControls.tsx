@@ -171,6 +171,18 @@ function TextColorControl({
     });
   }
 
+  function channelGradient(channel: "c" | "m" | "y" | "k") {
+    return `linear-gradient(90deg, ${textColorToPreviewHex({
+      mode: "cmyk",
+      ...cmykChannels,
+      [channel]: 0
+    })}, ${textColorToPreviewHex({
+      mode: "cmyk",
+      ...cmykChannels,
+      [channel]: 100
+    })})`;
+  }
+
   return (
     <div className="grid gap-2">
       <div className="grid grid-cols-[48px_1fr] gap-2">
@@ -198,20 +210,39 @@ function TextColorControl({
         </div>
       </div>
 
-      <div className="grid grid-cols-4 gap-2">
+      <div className="grid gap-3">
         {(["c", "m", "y", "k"] as const).map((channel) => (
-          <label key={channel} className="grid gap-1 text-xs font-semibold uppercase text-neutral-600">
-            {channel}
+          <div key={channel} className="grid gap-1.5">
+            <div className="grid grid-cols-[22px_1fr_76px] items-center gap-2">
+              <span className="text-xs font-semibold uppercase text-neutral-600">{channel}</span>
+              <div
+                aria-hidden="true"
+                className="h-2 rounded-full border border-line"
+                style={{ background: channelGradient(channel) }}
+              />
+              <input
+                aria-label={`${label} ${channel.toUpperCase()} CMYK value`}
+                className={controlClass}
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={cmykChannels[channel]}
+                onChange={(event) => updateCmyk(channel, Number(event.target.value))}
+              />
+            </div>
             <input
-              className={controlClass}
-              type="number"
+              aria-label={`${label} ${channel.toUpperCase()} CMYK slider`}
+              className="w-full cursor-pointer"
+              type="range"
               min="0"
               max="100"
               step="0.1"
               value={cmykChannels[channel]}
               onChange={(event) => updateCmyk(channel, Number(event.target.value))}
+              style={{ accentColor: previewHex }}
             />
-          </label>
+          </div>
         ))}
       </div>
     </div>
