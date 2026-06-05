@@ -2,6 +2,7 @@
 
 import type { CardLayout, GuestRow, ProjectSettings } from "@/types/placecard";
 import { styleCssFontFamily } from "@/lib/typography";
+import { formatInchesFromPoints } from "@/lib/units";
 
 export function CardPreview2D({
   layout,
@@ -19,7 +20,7 @@ export function CardPreview2D({
       <div className="mb-3 flex items-center justify-between gap-3">
         <h2 className="text-base font-semibold">Flat PDF Preview</h2>
         <span className="text-xs text-neutral-500">
-          {layout.flatWidthPt.toFixed(1)} x {layout.flatHeightPt.toFixed(1)} pt
+          {formatInchesFromPoints(layout.flatWidthPt)} x {formatInchesFromPoints(layout.flatHeightPt)}
         </span>
       </div>
       <div

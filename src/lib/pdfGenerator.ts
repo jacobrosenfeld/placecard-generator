@@ -10,6 +10,7 @@ import type { CardLayout, GuestRow, LogoSettings, OutputMode, ProjectSettings, R
 import { buildCardLayout, insetRect } from "./layoutEngine";
 import { fitTextToBox } from "./textFit";
 import { getCuratedFont, hexToPdfRgb } from "./typography";
+import { formatInchesFromPoints } from "./units";
 
 type GeneratePdfInput = {
   settings: ProjectSettings;
@@ -127,7 +128,11 @@ async function embedStyleFont(pdfDoc: PDFDocument, style: TextStyle) {
   return pdfDoc.embedFont(standardFont);
 }
 
-function drawProofGuides(page: ReturnType<PDFDocument["addPage"]>, layout: CardLayout) {
+function drawProofGuides(
+  page: ReturnType<PDFDocument["addPage"]>,
+  layout: CardLayout,
+  font: Awaited<ReturnType<PDFDocument["embedFont"]>>
+) {
   page.drawLine({
     start: { x: 0, y: layout.foldLineY },
     end: { x: layout.flatWidthPt, y: layout.foldLineY },
@@ -135,6 +140,24 @@ function drawProofGuides(page: ReturnType<PDFDocument["addPage"]>, layout: CardL
     color: rgb(0.55, 0.35, 0.15),
     dashArray: [4, 4]
   });
+  page.drawText(`Fold line: ${formatInchesFromPoints(layout.foldLineY)} from bottom`, {
+    x: 8,
+    y: layout.foldLineY + 5,
+    size: 7,
+    font,
+    color: rgb(0.45, 0.28, 0.12)
+  });
+
+  page.drawText(
+    `Flat size: ${formatInchesFromPoints(layout.flatWidthPt)} x ${formatInchesFromPoints(layout.flatHeightPt)}`,
+    {
+      x: 8,
+      y: layout.flatHeightPt - 12,
+      size: 7,
+      font,
+      color: rgb(0.45, 0.45, 0.45)
+    }
+  );
 
   for (const panel of [layout.topPanel, layout.bottomPanel]) {
     const safe = insetRect(panel, layout.safeMarginPt);
@@ -147,6 +170,14 @@ function drawProofGuides(page: ReturnType<PDFDocument["addPage"]>, layout: CardL
       borderWidth: 0.35
     });
   }
+
+  page.drawText(`Safe margin: ${formatInchesFromPoints(layout.safeMarginPt)}`, {
+    x: 8,
+    y: 20,
+    size: 7,
+    font,
+    color: rgb(0.45, 0.45, 0.45)
+  });
 }
 
 export async function generatePlacecardPdf({ settings, guests, outputMode }: GeneratePdfInput): Promise<Uint8Array> {
@@ -159,7 +190,7 @@ export async function generatePlacecardPdf({ settings, guests, outputMode }: Gen
 
   guests.forEach((guest, index) => {
     const page = pdfDoc.addPage([layout.flatWidthPt, layout.flatHeightPt]);
-    if (outputMode === "proof") drawProofGuides(page, layout);
+    if (outputMode === "proof") drawProofGuides(page, layout, regularFont);
 
     drawCenteredContent({
       page,

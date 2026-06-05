@@ -11,6 +11,7 @@ import { LogoUploader } from "@/components/LogoUploader";
 import { ProjectSetupForm } from "@/components/ProjectSetupForm";
 import { TypographyControls } from "@/components/TypographyControls";
 import { buildCardLayout } from "@/lib/layoutEngine";
+import { formatInchesFromPoints } from "@/lib/units";
 import { summarizeGuestWarnings, validateSettings } from "@/lib/validation";
 import type { GuestRow, ParsedGuestList, ProjectSettings } from "@/types/placecard";
 
@@ -135,10 +136,10 @@ export default function NewProjectPage() {
                 </p>
               )}
               <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-neutral-600">
-                <span>Finished: {settings.finishedWidth} x {settings.finishedHeight} {settings.unit}</span>
-                <span>Flat: {(layout.flatWidthPt / 72).toFixed(2)} x {(layout.flatHeightPt / 72).toFixed(2)} in</span>
-                <span>Fold line: {layout.foldLineY.toFixed(1)} pt</span>
-                <span>Safe margin: {layout.safeMarginPt.toFixed(1)} pt</span>
+                <span>Finished: {formatInchesFromPoints(layout.finishedWidthPt)} x {formatInchesFromPoints(layout.finishedHeightPt)}</span>
+                <span>Flat: {formatInchesFromPoints(layout.flatWidthPt)} x {formatInchesFromPoints(layout.flatHeightPt)}</span>
+                <span>Fold line: {formatInchesFromPoints(layout.foldLineY)} from bottom</span>
+                <span>Safe margin: {formatInchesFromPoints(layout.safeMarginPt)}</span>
               </div>
             </section>
 

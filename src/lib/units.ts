@@ -16,6 +16,10 @@ export function fromPoints(value: number, unit: Unit): number {
   return value;
 }
 
-export function formatPoints(value: number): string {
-  return `${value.toFixed(2)} pt`;
+export function pointsToInches(value: number): number {
+  return fromPoints(value, "in");
+}
+
+export function formatInchesFromPoints(value: number): string {
+  return `${pointsToInches(value).toFixed(2)} in`;
 }

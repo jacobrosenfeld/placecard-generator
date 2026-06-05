@@ -30,7 +30,6 @@ export function ProjectSetupForm({
           <select className={controlClass} value={settings.unit} onChange={(event) => onChange({ ...settings, unit: event.target.value as Unit })}>
             <option value="in">Inches</option>
             <option value="mm">Millimeters</option>
-            <option value="pt">Points</option>
           </select>
         </Field>
         <Field label="Fold type">
