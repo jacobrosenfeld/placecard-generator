@@ -1,4 +1,11 @@
-import { PDFDocument, StandardFonts, rgb, degrees } from "pdf-lib";
+import {
+  PDFDocument,
+  StandardFonts,
+  rgb,
+  concatTransformationMatrix,
+  popGraphicsState,
+  pushGraphicsState
+} from "pdf-lib";
 import type { CardLayout, GuestRow, LogoSettings, OutputMode, ProjectSettings, Rect, TextStyle } from "@/types/placecard";
 import { buildCardLayout, insetRect } from "./layoutEngine";
 import { fitTextToBox } from "./textFit";
@@ -34,6 +41,15 @@ function textX(panel: Rect, lineWidth: number, align: TextStyle["align"]): numbe
   return panel.x + (panel.width - lineWidth) / 2;
 }
 
+export function panelRotationMatrix(panel: Rect, rotation: 0 | 180): [number, number, number, number, number, number] {
+  if (rotation === 0) return [1, 0, 0, 1, 0, 0];
+
+  const centerX = panel.x + panel.width / 2;
+  const centerY = panel.y + panel.height / 2;
+
+  return [-1, 0, 0, -1, centerX * 2, centerY * 2];
+}
+
 function drawCenteredContent(params: {
   page: ReturnType<PDFDocument["addPage"]>;
   panel: Rect;
@@ -64,9 +80,12 @@ function drawCenteredContent(params: {
   });
   const blockHeight = fitted.lines.length * fitted.lineHeight + logoMaxHeight + logoGap;
   const startY = safePanel.y + (safePanel.height + blockHeight) / 2 - logoMaxHeight;
-  const rotate = rotation === 180 ? degrees(180) : degrees(0);
-  const centerX = panel.x + panel.width / 2;
-  const centerY = panel.y + panel.height / 2;
+  const matrix = panelRotationMatrix(panel, rotation);
+
+  page.pushOperators(
+    pushGraphicsState(),
+    concatTransformationMatrix(...matrix)
+  );
 
   if (drawLogo && logo && logoImage) {
     const maxWidth = safePanel.width * (logo.maxWidthPercent / 100);
@@ -78,11 +97,10 @@ function drawCenteredContent(params: {
     const logoY = startY;
 
     page.drawImage(logoImage, {
-      x: rotation === 180 ? centerX * 2 - logoX - width : logoX,
-      y: rotation === 180 ? centerY * 2 - logoY - height : logoY,
+      x: logoX,
+      y: logoY,
       width,
-      height,
-      rotate
+      height
     });
   }
 
@@ -91,14 +109,15 @@ function drawCenteredContent(params: {
     const y = startY - logoGap - logoMaxHeight - fitted.lineHeight * (index + 1);
     const x = textX(safePanel, width, style.align);
     page.drawText(line, {
-      x: rotation === 180 ? centerX * 2 - x - width : x,
-      y: rotation === 180 ? centerY * 2 - y - fitted.fontSize : y,
+      x,
+      y,
       size: fitted.fontSize,
       font: activeFont,
-      color: hexToPdfRgb(style.color),
-      rotate
+      color: hexToPdfRgb(style.color)
     });
   });
+
+  page.pushOperators(popGraphicsState());
 }
 
 async function embedStyleFont(pdfDoc: PDFDocument, style: TextStyle) {
