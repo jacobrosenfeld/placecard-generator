@@ -20,7 +20,6 @@ const settings: ProjectSettings = {
     fontSize: 30,
     minFontSize: 12,
     fontWeight: "bold",
-    align: "center",
     uppercase: false,
     maxLines: 2,
     color: { mode: "cmyk", c: 10, m: 20, y: 30, k: 40 }
@@ -30,7 +29,6 @@ const settings: ProjectSettings = {
     fontSize: 18,
     minFontSize: 10,
     fontWeight: "normal",
-    align: "center",
     uppercase: false,
     maxLines: 1,
     color: "#202124"

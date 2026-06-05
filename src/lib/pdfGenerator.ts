@@ -38,9 +38,7 @@ async function embedLogo(pdfDoc: PDFDocument, logo?: LogoSettings) {
   return undefined;
 }
 
-function textX(panel: Rect, lineWidth: number, align: TextStyle["align"]): number {
-  if (align === "left") return panel.x;
-  if (align === "right") return panel.x + panel.width - lineWidth;
+function textX(panel: Rect, lineWidth: number): number {
   return panel.x + (panel.width - lineWidth) / 2;
 }
 
@@ -109,7 +107,7 @@ function drawCenteredContent(params: {
   fitted.lines.forEach((line, index) => {
     const width = textRenderer.measureText(line, fitted.fontSize);
     const y = startY - logoGap - logoMaxHeight - fitted.lineHeight * (index + 1);
-    const x = textX(safePanel, width, style.align);
+    const x = textX(safePanel, width);
     textRenderer.drawLine({
       page,
       text: line,

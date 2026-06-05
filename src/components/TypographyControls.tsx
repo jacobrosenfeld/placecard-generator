@@ -103,24 +103,6 @@ export function TypographyControls({
             ))}
           </select>
         </Field>
-        <Field label="Alignment">
-          <select
-            className={controlClass}
-            value={settings.nameText.align}
-            onChange={(event) => {
-              const align = event.target.value as TextStyle["align"];
-              onChange({
-                ...settings,
-                nameText: updateTextStyle(settings.nameText, { align }),
-                tableText: updateTextStyle(settings.tableText, { align })
-              });
-            }}
-          >
-            <option value="center">Center</option>
-            <option value="left">Left</option>
-            <option value="right">Right</option>
-          </select>
-        </Field>
         <Field label="Name color">
           <TextColorControl
             label="Name"

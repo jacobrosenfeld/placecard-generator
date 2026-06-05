@@ -40,7 +40,6 @@ export type TextStyle = {
   fontSize: number;
   minFontSize: number;
   fontWeight: FontWeight;
-  align: "left" | "center" | "right";
   uppercase: boolean;
   maxLines: number;
   color: TextColor;
