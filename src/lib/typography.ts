@@ -79,6 +79,13 @@ export function extractGoogleFontUrl(css: string): string | undefined {
 }
 
 export async function fetchGoogleFontBytes(value: string): Promise<Uint8Array | undefined> {
+  if (typeof window !== "undefined") {
+    const response = await fetch(`/api/google-font?font=${encodeURIComponent(value)}`);
+    if (!response.ok) return undefined;
+
+    return new Uint8Array(await response.arrayBuffer());
+  }
+
   const cssResponse = await fetch(googleFontsHref(value));
   if (!cssResponse.ok) return undefined;
 
