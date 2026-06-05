@@ -11,6 +11,7 @@ import { LogoUploader } from "@/components/LogoUploader";
 import { ProjectSetupForm } from "@/components/ProjectSetupForm";
 import { TypographyControls } from "@/components/TypographyControls";
 import { buildCardLayout } from "@/lib/layoutEngine";
+import { sortGuestRows } from "@/lib/sortGuests";
 import { formatInchesFromPoints } from "@/lib/units";
 import { summarizeGuestWarnings, validateSettings } from "@/lib/validation";
 import type { GuestRow, ParsedGuestList, ProjectSettings } from "@/types/placecard";
@@ -25,6 +26,7 @@ const defaultSettings: ProjectSettings = {
   bleed: 0.125,
   safeMargin: 0.25,
   outputMode: "single-up",
+  exportSortMode: "table",
   includeLogo: false,
   nameText: {
     fontFamily: "eb-garamond",
@@ -58,7 +60,8 @@ export default function NewProjectPage() {
   const [previewState, setPreviewState] = useState<PreviewState>("folded");
 
   const layout = useMemo(() => buildCardLayout(settings), [settings]);
-  const selectedGuest = guests[Math.min(previewIndex, Math.max(guests.length - 1, 0))];
+  const sortedGuests = useMemo(() => sortGuestRows(guests, settings.exportSortMode), [guests, settings.exportSortMode]);
+  const selectedGuest = sortedGuests[Math.min(previewIndex, Math.max(sortedGuests.length - 1, 0))];
   const warnings = [
     ...validateSettings(settings),
     ...(parsed?.warnings || []),
@@ -136,6 +139,7 @@ export default function NewProjectPage() {
                 <span>Side 1: name on bottom</span>
                 <span>Side 2: table on top rotated</span>
                 <span>Safe margin: {formatInchesFromPoints(layout.safeMarginPt)}</span>
+                <span>Export sort: {settings.exportSortMode === "table" ? "Table" : "Last name"}</span>
               </div>
             </section>
 

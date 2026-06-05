@@ -15,6 +15,7 @@ const settings: ProjectSettings = {
   bleed: 0.125,
   safeMargin: 0.125,
   outputMode: "single-up",
+  exportSortMode: "table",
   includeLogo: false,
   nameText: {
     fontFamily: "eb-garamond",
@@ -43,9 +44,48 @@ const guest: GuestRow = {
   name: "Dr. & Mrs. Jonathan Rosenberg",
   tableRaw: "12",
   tableLabel: "Table 12",
+  lastName: "Rosenberg",
+  nameSortKey: "rosenberg",
+  tableSortKey: "0-00000012-12",
   sourceRowNumber: 2,
   warnings: []
 };
+
+const unsortedGuests: GuestRow[] = [
+  {
+    id: "1",
+    name: "Zoe Cohen",
+    tableRaw: "12",
+    tableLabel: "Table 12",
+    lastName: "Cohen",
+    nameSortKey: "cohen",
+    tableSortKey: "0-00000012-12",
+    sourceRowNumber: 2,
+    warnings: []
+  },
+  {
+    id: "2",
+    name: "Aaron Smith",
+    tableRaw: "2",
+    tableLabel: "Table 2",
+    lastName: "Smith",
+    nameSortKey: "smith",
+    tableSortKey: "0-00000002-2",
+    sourceRowNumber: 3,
+    warnings: []
+  },
+  {
+    id: "3",
+    name: "Bella Adams",
+    tableRaw: "7",
+    tableLabel: "Table 7",
+    lastName: "Adams",
+    nameSortKey: "adams",
+    tableSortKey: "0-00000007-7",
+    sourceRowNumber: 4,
+    warnings: []
+  }
+];
 
 function inflatePdfStreams(bytes: Uint8Array): string {
   const source = Buffer.from(bytes).toString("latin1");
@@ -145,5 +185,17 @@ describe("PDF panel transforms", () => {
     expect(decodedStreams).toContain("0.1 0.2 0.3 0.4 k");
     expect(decodedStreams).not.toMatch(/\srg\b/);
     expect(decodedStreams).not.toMatch(/\sRG\b/);
+  });
+
+  it("applies the selected sort order inside PDF generation", async () => {
+    const bytes = await generatePlacecardPdf({
+      settings: { ...settings, exportSortMode: "last-name" },
+      guests: unsortedGuests,
+      outputMode: "single-up"
+    });
+    const readableStreams = decodePdfHexText(inflatePdfStreams(bytes));
+
+    expect(readableStreams.indexOf("Bella Adams")).toBeLessThan(readableStreams.indexOf("Zoe Cohen"));
+    expect(readableStreams.indexOf("Zoe Cohen")).toBeLessThan(readableStreams.indexOf("Aaron Smith"));
   });
 });

@@ -82,6 +82,7 @@ export function GuestListUploader({
                 <tr>
                   <th className="px-3 py-2">Row</th>
                   <th className="px-3 py-2">Name</th>
+                  <th className="px-3 py-2">Last name</th>
                   <th className="px-3 py-2">Table</th>
                   <th className="px-3 py-2">Warnings</th>
                 </tr>
@@ -91,6 +92,7 @@ export function GuestListUploader({
                   <tr key={guest.id} className="border-t border-line">
                     <td className="px-3 py-2 text-neutral-500">{guest.sourceRowNumber}</td>
                     <td className="px-3 py-2 font-medium">{guest.name}</td>
+                    <td className="px-3 py-2">{guest.lastName}</td>
                     <td className="px-3 py-2">{guest.tableLabel}</td>
                     <td className="px-3 py-2 text-clay">{guest.warnings.join(" ")}</td>
                   </tr>

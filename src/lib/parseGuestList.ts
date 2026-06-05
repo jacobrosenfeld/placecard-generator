@@ -4,6 +4,47 @@ import type { GuestRow, ParsedGuestList } from "@/types/placecard";
 import { formatTableLabel, normalizeWhitespace } from "./normalizeTableLabel";
 
 const HEADER_HINTS = ["name", "guest", "guest name", "full name", "table", "table number", "table no"];
+const HONORIFICS = new Set([
+  "mr",
+  "mister",
+  "mrs",
+  "ms",
+  "miss",
+  "mx",
+  "dr",
+  "doctor",
+  "prof",
+  "professor",
+  "rabbi",
+  "rev",
+  "reverend",
+  "hon",
+  "judge",
+  "sir",
+  "dame",
+  "fr",
+  "father"
+]);
+const NAME_CONNECTORS = new Set(["and", "&"]);
+const NAME_SUFFIXES = new Set(["jr", "sr", "ii", "iii", "iv", "v", "phd", "md", "esq"]);
+const LAST_NAME_PARTICLES = new Set([
+  "al",
+  "bin",
+  "ben",
+  "da",
+  "de",
+  "del",
+  "della",
+  "der",
+  "di",
+  "du",
+  "la",
+  "le",
+  "st",
+  "saint",
+  "van",
+  "von"
+]);
 
 function normalizeCell(value: unknown): string {
   if (value === null || value === undefined) return "";
@@ -19,6 +60,85 @@ function looksLikeHeader(row: string[]): boolean {
 function inferColumn(columns: string[], matchers: RegExp[], fallback: number): number {
   const index = columns.findIndex((column) => matchers.some((matcher) => matcher.test(column)));
   return index >= 0 ? index : fallback;
+}
+
+function normalizeNameToken(value: string): string {
+  return value.toLocaleLowerCase().replace(/^[^\p{L}\p{N}]+|[^\p{L}\p{N}]+$/gu, "");
+}
+
+export function buildNameSortKey(value: string): string {
+  return normalizeWhitespace(value)
+    .toLocaleLowerCase()
+    .normalize("NFKD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .replace(/[^\p{L}\p{N}]+/gu, " ")
+    .trim();
+}
+
+function stripLeadingTitles(tokens: string[]): string[] {
+  let index = 0;
+
+  while (index < tokens.length) {
+    const token = normalizeNameToken(tokens[index]);
+    if (HONORIFICS.has(token) || NAME_CONNECTORS.has(token)) {
+      index += 1;
+      continue;
+    }
+    break;
+  }
+
+  return tokens.slice(index);
+}
+
+function stripTrailingSuffixes(tokens: string[]): string[] {
+  let end = tokens.length;
+
+  while (end > 0 && NAME_SUFFIXES.has(normalizeNameToken(tokens[end - 1]))) {
+    end -= 1;
+  }
+
+  return tokens.slice(0, end);
+}
+
+function lastNameFromTokens(tokens: string[]): string {
+  const cleanedTokens = stripTrailingSuffixes(stripLeadingTitles(tokens)).filter((token) => normalizeNameToken(token));
+  if (!cleanedTokens.length) return "";
+  if (cleanedTokens.length === 1) return cleanedTokens[0];
+
+  let startIndex = cleanedTokens.length - 1;
+  while (startIndex > 0 && LAST_NAME_PARTICLES.has(normalizeNameToken(cleanedTokens[startIndex - 1]))) {
+    startIndex -= 1;
+  }
+
+  return cleanedTokens.slice(startIndex).join(" ");
+}
+
+/**
+ * Extracts a best-effort last name for export sorting. Handles inverted
+ * "Last, First" names, common honorifics, joined titles, multi-word last-name
+ * particles such as "Van" and "de la", and falls back to the full name token.
+ */
+export function extractLastName(fullName: string): string {
+  const name = normalizeWhitespace(fullName);
+  if (!name) return "";
+
+  const [invertedLastName] = name.split(",");
+  if (name.includes(",") && invertedLastName) {
+    const invertedTokens = normalizeWhitespace(invertedLastName).split(" ");
+    return lastNameFromTokens(invertedTokens) || invertedLastName;
+  }
+
+  return lastNameFromTokens(name.split(" ")) || name;
+}
+
+export function buildTableSortKey(tableRaw: string, tableLabel: string): string {
+  const source = normalizeWhitespace(tableRaw || tableLabel);
+  const numericMatch = source.match(/\d+/);
+
+  if (numericMatch) return `0-${Number(numericMatch[0]).toString().padStart(8, "0")}-${buildNameSortKey(source)}`;
+  if (!source) return "2";
+
+  return `1-${buildNameSortKey(source)}`;
 }
 
 export async function parseGuestListFile(file: File): Promise<ParsedGuestList> {
@@ -83,6 +203,7 @@ export function mapGuestRows(parsed: ParsedGuestList, nameColumnIndex: number, t
       const name = normalizeWhitespace(row[nameColumnIndex] || "");
       const tableRaw = normalizeWhitespace(row[tableColumnIndex] || "");
       const tableLabel = formatTableLabel(tableRaw);
+      const lastName = extractLastName(name);
       const warnings: string[] = [];
       const normalizedName = name.toLocaleLowerCase();
 
@@ -95,6 +216,9 @@ export function mapGuestRows(parsed: ParsedGuestList, nameColumnIndex: number, t
         name,
         tableRaw,
         tableLabel,
+        lastName,
+        nameSortKey: buildNameSortKey(lastName || name),
+        tableSortKey: buildTableSortKey(tableRaw, tableLabel),
         sourceRowNumber: parsed.hasHeader ? rowIndex + 2 : rowIndex + 1,
         warnings
       };

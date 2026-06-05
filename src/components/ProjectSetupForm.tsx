@@ -1,6 +1,6 @@
 "use client";
 
-import type { ProjectSettings, Unit } from "@/types/placecard";
+import type { ExportSortMode, ProjectSettings, Unit } from "@/types/placecard";
 import { controlClass, Field } from "./Field";
 
 export function ProjectSetupForm({
@@ -35,6 +35,16 @@ export function ProjectSetupForm({
         <Field label="Fold type">
           <select className={controlClass} value={settings.foldType} onChange={(event) => onChange({ ...settings, foldType: event.target.value as ProjectSettings["foldType"] })}>
             <option value="horizontal-tent">Horizontal tent</option>
+          </select>
+        </Field>
+        <Field label="Export sort order">
+          <select
+            className={controlClass}
+            value={settings.exportSortMode}
+            onChange={(event) => onChange({ ...settings, exportSortMode: event.target.value as ExportSortMode })}
+          >
+            <option value="table">Sort by Table</option>
+            <option value="last-name">Sort by Last Name</option>
           </select>
         </Field>
         <Field label="Bleed" hint="Default is 0.125 inch equivalent.">

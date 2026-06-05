@@ -31,6 +31,11 @@ This project is open source under the MIT License.
   preview, proof PDF, and print PDF export.
 - Supports independent small-caps typography settings for guest names and table
   labels across previews and PDF export.
+- Supports export sorting by table number or parsed guest last name. Last-name
+  parsing handles common honorifics, joined titles such as
+  `Mr. and Mrs. John Smith`, inverted names such as `Smith, John`, multi-word
+  particles such as `de la Cruz` and `Van Dyke`, and falls back to the full
+  available name when needed.
 - Supports CMYK text color choosing with exact numeric entry and built-in
   presets for Gold
   (`10,23,91,22`) and 100K Black (`0,0,0,100`). Browser previews approximate
@@ -104,6 +109,7 @@ Status of tracked issues (closed = implemented):
 - [#17 Generate PDFs using CMYK output](https://github.com/jacobrosenfeld/placecard-generator/issues/17) — Closed
 - [#18 Include font name, CMYK values, and font size in Proof PDF (metadata)](https://github.com/jacobrosenfeld/placecard-generator/issues/18) — Closed
 - [#19 Timestamp exported PDF filenames (proof & print-ready) using user's local date/time](https://github.com/jacobrosenfeld/placecard-generator/issues/19) — Closed
+- [#20 Add export option: sort PDFs by table number or guest last name (with name parsing)](https://github.com/jacobrosenfeld/placecard-generator/issues/20) — Closed
 
 If you'd like any of the remaining open issues closed or need follow-ups, tell me which ones and I'll either close them or ask for clarification.
 

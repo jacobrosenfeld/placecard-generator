@@ -4,6 +4,8 @@ export type FoldType = "horizontal-tent" | "vertical-tent";
 
 export type OutputMode = "single-up" | "proof";
 
+export type ExportSortMode = "table" | "last-name";
+
 export type FontWeight = "light" | "normal" | "bold";
 
 export type CmykColor = {
@@ -74,6 +76,7 @@ export type ProjectSettings = {
   bleed: number;
   safeMargin: number;
   outputMode: OutputMode;
+  exportSortMode: ExportSortMode;
   includeLogo: boolean;
   logo?: LogoSettings;
   nameText: TextStyle;
@@ -85,6 +88,9 @@ export type GuestRow = {
   name: string;
   tableRaw: string;
   tableLabel: string;
+  lastName: string;
+  nameSortKey: string;
+  tableSortKey: string;
   sourceRowNumber: number;
   warnings: string[];
 };

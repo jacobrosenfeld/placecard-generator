@@ -15,6 +15,7 @@ import { isCmykColor, textColorToCmykChannels, textColorToPdfCmyk, textColorToPr
 import { displayTextForStyle, styledTextRuns } from "./textStyleRuns";
 import { FONT_WEIGHT_LABELS, getCuratedFont, normalizeFontWeight } from "./typography";
 import { formatInchesFromPoints } from "./units";
+import { sortGuestRows } from "./sortGuests";
 
 type GeneratePdfInput = {
   settings: ProjectSettings;
@@ -113,6 +114,7 @@ export function proofMetadataLines(settings: ProjectSettings, layout: CardLayout
   const lines = [
     "Proof PDF metadata",
     `Project: ${settings.projectName || "Untitled"}${settings.clientName ? ` | Client: ${settings.clientName}` : ""}`,
+    `Export sort: ${settings.exportSortMode === "table" ? "Table number" : "Guest last name"}`,
     `Flat page: ${formatInchesFromPoints(layout.flatWidthPt)} x ${formatInchesFromPoints(layout.flatHeightPt)} | Finished folded: ${formatInchesFromPoints(layout.finishedWidthPt)} x ${formatInchesFromPoints(layout.finishedHeightPt)}`,
     `Safe margin: ${formatInchesFromPoints(layout.safeMarginPt)} | Bleed: ${formatInchesFromPoints(layout.bleedPt)}`,
     formatTextStyleMetadata("Name text", settings.nameText),
@@ -299,8 +301,9 @@ export async function generatePlacecardPdf({ settings, guests, outputMode }: Gen
   const nameTextRenderer = await createTextRenderer(pdfDoc, settings.nameText);
   const tableTextRenderer = await createTextRenderer(pdfDoc, settings.tableText);
   const logoImage = await embedLogo(pdfDoc, settings.includeLogo ? settings.logo : undefined);
+  const sortedGuests = sortGuestRows(guests, settings.exportSortMode);
 
-  guests.forEach((guest, index) => {
+  sortedGuests.forEach((guest, index) => {
     const namePage = pdfDoc.addPage([layout.flatWidthPt, layout.flatHeightPt]);
     if (outputMode === "proof") drawProofGuides(namePage, layout, regularFont, `Side 1 name ${index + 1}`);
 
@@ -334,14 +337,14 @@ export async function generatePlacecardPdf({ settings, guests, outputMode }: Gen
     });
 
     if (outputMode === "proof") {
-      namePage.drawText(`Proof ${index + 1} of ${guests.length} side 1`, {
+      namePage.drawText(`Proof ${index + 1} of ${sortedGuests.length} side 1`, {
         x: 8,
         y: 18,
         size: 6,
         font: regularFont,
         color: cmyk(0, 0, 0, 0.55)
       });
-      tablePage.drawText(`Proof ${index + 1} of ${guests.length} side 2`, {
+      tablePage.drawText(`Proof ${index + 1} of ${sortedGuests.length} side 2`, {
         x: 8,
         y: 18,
         size: 6,
