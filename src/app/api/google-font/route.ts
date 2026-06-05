@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { extractGoogleFontUrl, GOOGLE_FONTS_PDF_HEADERS, googleFontsHref } from "@/lib/typography";
+import { extractGoogleFontUrl, GOOGLE_FONTS_PDF_HEADERS, googleFontsPdfHref } from "@/lib/typography";
 
 export const runtime = "nodejs";
 
@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ error: "Missing font query parameter." }, { status: 400 });
   }
 
-  const cssResponse = await fetch(googleFontsHref(font), {
+  const cssResponse = await fetch(googleFontsPdfHref(font), {
     headers: GOOGLE_FONTS_PDF_HEADERS,
     next: { revalidate: 60 * 60 * 24 * 30 }
   });

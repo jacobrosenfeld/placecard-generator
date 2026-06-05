@@ -10,7 +10,7 @@ import fontkit from "@pdf-lib/fontkit";
 import type { CardLayout, GuestRow, LogoSettings, OutputMode, ProjectSettings, Rect, TextStyle } from "@/types/placecard";
 import { buildCardLayout, insetRect } from "./layoutEngine";
 import { fitTextToBox } from "./textFit";
-import { fetchGoogleFontBytes, getCuratedFont, hexToPdfRgb } from "./typography";
+import { fetchCuratedFontBytes, fetchGoogleFontBytes, getCuratedFont, hexToPdfRgb } from "./typography";
 import { formatInchesFromPoints } from "./units";
 
 type GeneratePdfInput = {
@@ -135,9 +135,14 @@ async function embedStyleFont(pdfDoc: PDFDocument, style: TextStyle) {
   }
 
   const curatedFont = getCuratedFont(style.fontFamily);
+  const curatedFontBytes = await fetchCuratedFontBytes(curatedFont);
+  if (curatedFontBytes) {
+    return pdfDoc.embedFont(curatedFontBytes, { subset: true });
+  }
+
   const standardFont = style.fontWeight === "bold" ? curatedFont.pdfBold : curatedFont.pdfRegular;
 
-  return pdfDoc.embedFont(standardFont);
+  return pdfDoc.embedFont(standardFont || StandardFonts.TimesRoman);
 }
 
 function drawProofGuides(

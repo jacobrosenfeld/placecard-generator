@@ -6,8 +6,9 @@ export type CuratedFont = {
   id: string;
   label: string;
   cssFamily: string;
-  pdfRegular: StandardFonts;
-  pdfBold: StandardFonts;
+  pdfRegular?: StandardFonts;
+  pdfBold?: StandardFonts;
+  fontFileUrl?: string;
 };
 
 export const CURATED_FONTS: CuratedFont[] = [
@@ -38,6 +39,12 @@ export const CURATED_FONTS: CuratedFont[] = [
     cssFamily: "'Courier New', Courier, monospace",
     pdfRegular: StandardFonts.Courier,
     pdfBold: StandardFonts.CourierBold
+  },
+  {
+    id: "script-pinyon",
+    label: "Pinyon Script",
+    cssFamily: "'Pinyon Script', cursive",
+    fontFileUrl: "/fonts/pinyon-script.ttf"
   }
 ];
 
@@ -77,6 +84,13 @@ export function googleFontsHref(value: string): string {
   return `https://fonts.googleapis.com/css2?family=${encodedFamily}${weightParam}&display=swap`;
 }
 
+export function googleFontsPdfHref(value: string): string {
+  const { family, weight } = parseGoogleFontOverride(value);
+  const encodedFamily = family.replace(/\s+/g, "+");
+  const weightParam = weight ? `:${encodeURIComponent(weight)}` : "";
+  return `https://fonts.googleapis.com/css?family=${encodedFamily}${weightParam}`;
+}
+
 export function extractGoogleFontUrl(css: string): string | undefined {
   const preferredFormatMatch = css.match(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)\s*format\('(truetype|opentype)'\)/);
   if (preferredFormatMatch?.[1]) return preferredFormatMatch[1];
@@ -92,7 +106,7 @@ export async function fetchGoogleFontBytes(value: string): Promise<Uint8Array | 
     return new Uint8Array(await response.arrayBuffer());
   }
 
-  const cssResponse = await fetch(googleFontsHref(value), {
+  const cssResponse = await fetch(googleFontsPdfHref(value), {
     headers: GOOGLE_FONTS_PDF_HEADERS
   });
   if (!cssResponse.ok) return undefined;
@@ -105,6 +119,16 @@ export async function fetchGoogleFontBytes(value: string): Promise<Uint8Array | 
   if (!fontResponse.ok) return undefined;
 
   return new Uint8Array(await fontResponse.arrayBuffer());
+}
+
+export async function fetchCuratedFontBytes(font: CuratedFont): Promise<Uint8Array | undefined> {
+  if (!font.fontFileUrl) return undefined;
+  if (typeof window === "undefined" && font.fontFileUrl.startsWith("/")) return undefined;
+
+  const response = await fetch(font.fontFileUrl);
+  if (!response.ok) return undefined;
+
+  return new Uint8Array(await response.arrayBuffer());
 }
 
 export function hexToPdfRgb(value: string): RGB {

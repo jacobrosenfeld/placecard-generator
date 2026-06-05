@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { extractGoogleFontUrl, googleFontsHref, parseGoogleFontOverride } from "@/lib/typography";
+import { extractGoogleFontUrl, googleFontsHref, googleFontsPdfHref, parseGoogleFontOverride } from "@/lib/typography";
 
 describe("typography helpers", () => {
   it("parses Google font overrides with optional weight notation", () => {
@@ -16,6 +16,9 @@ describe("typography helpers", () => {
   it("builds a Google Fonts CSS URL", () => {
     expect(googleFontsHref("Cormorant Garamond@600")).toBe(
       "https://fonts.googleapis.com/css2?family=Cormorant+Garamond:wght@600&display=swap"
+    );
+    expect(googleFontsPdfHref("Cormorant Garamond@600")).toBe(
+      "https://fonts.googleapis.com/css?family=Cormorant+Garamond:600"
     );
   });
 

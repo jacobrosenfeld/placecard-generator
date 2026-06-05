@@ -98,7 +98,7 @@ export function TypographyControls({
           </Field>
         ) : null}
         {settings.tableText.fontMode === "google" ? (
-          <Field label="Table Google Font" hint="Preview uses the Google font. PDF export falls back to the selected curated PDF font for now.">
+          <Field label="Table Google Font" hint="Use Family or Family@weight, for example Cormorant Garamond@400.">
             <input
               className={controlClass}
               value={settings.tableText.googleFontFamily}

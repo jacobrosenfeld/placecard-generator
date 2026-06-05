@@ -2,6 +2,14 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: "Pinyon Script";
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url("/fonts/pinyon-script.ttf") format("truetype");
+}
+
 :root {
   color-scheme: light;
   background: #fbfaf7;
