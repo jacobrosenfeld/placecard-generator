@@ -1,5 +1,3 @@
-import { rgb } from "pdf-lib";
-import type { RGB } from "pdf-lib";
 import type { FontWeight, TextStyle } from "@/types/placecard";
 
 export type CuratedFont = {
@@ -137,15 +135,4 @@ export async function fetchCuratedFontBytes(font: CuratedFont, fontWeight: FontW
   if (!response.ok) return undefined;
 
   return new Uint8Array(await response.arrayBuffer());
-}
-
-export function hexToPdfRgb(value: string): RGB {
-  const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(value.trim());
-  if (!match) return rgb(0.12, 0.13, 0.14);
-
-  return rgb(
-    Number.parseInt(match[1], 16) / 255,
-    Number.parseInt(match[2], 16) / 255,
-    Number.parseInt(match[3], 16) / 255
-  );
 }

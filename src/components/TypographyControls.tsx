@@ -1,7 +1,7 @@
 "use client";
 
 import type { FontWeight, ProjectSettings, TextStyle } from "@/types/placecard";
-import { isCmykColor, textColorToCmykChannels, textColorToPreviewHex } from "@/lib/color";
+import { CMYK_COLOR_PRESETS, textColorToCmykChannels, textColorToPreviewHex } from "@/lib/color";
 import { availableFontWeights, CURATED_FONTS, FONT_WEIGHT_LABELS, normalizeFontWeight } from "@/lib/typography";
 import { controlClass, Field } from "./Field";
 
@@ -157,7 +157,6 @@ function TextColorControl({
   style: TextStyle;
   onChange: (style: TextStyle) => void;
 }) {
-  const mode = isCmykColor(style.color) ? "cmyk" : "hex";
   const previewHex = textColorToPreviewHex(style.color);
   const cmykChannels = textColorToCmykChannels(style.color);
 
@@ -180,56 +179,41 @@ function TextColorControl({
           className="h-10 w-12 rounded-md border border-line"
           style={{ backgroundColor: previewHex }}
         />
-        <select
-          className={controlClass}
-          value={mode}
-          onChange={(event) => {
-            if (event.target.value === "cmyk") {
-              onChange({ ...style, color: { mode: "cmyk", ...cmykChannels } });
-              return;
-            }
-
-            onChange({ ...style, color: previewHex });
-          }}
-        >
-          <option value="hex">Hex</option>
-          <option value="cmyk">CMYK</option>
-        </select>
-      </div>
-
-      {mode === "hex" ? (
-        <div className="grid grid-cols-[48px_1fr] gap-2">
-          <input
-            aria-label={`${label} text color picker`}
-            className="h-10 w-12 rounded-md border border-line bg-white p-1"
-            type="color"
-            value={previewHex}
-            onChange={(event) => onChange({ ...style, color: event.target.value })}
-          />
-          <input
-            className={controlClass}
-            value={typeof style.color === "string" ? style.color : previewHex}
-            onChange={(event) => onChange({ ...style, color: event.target.value })}
-          />
-        </div>
-      ) : (
-        <div className="grid grid-cols-4 gap-2">
-          {(["c", "m", "y", "k"] as const).map((channel) => (
-            <label key={channel} className="grid gap-1 text-xs font-semibold uppercase text-neutral-600">
-              {channel}
-              <input
-                className={controlClass}
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                value={cmykChannels[channel]}
-                onChange={(event) => updateCmyk(channel, Number(event.target.value))}
+        <div className="flex flex-wrap gap-2">
+          {CMYK_COLOR_PRESETS.map((preset) => (
+            <button
+              key={preset.id}
+              type="button"
+              className="inline-flex h-10 items-center gap-2 rounded-md border border-line bg-white px-3 text-xs font-semibold text-ink transition hover:border-forest"
+              onClick={() => onChange({ ...style, color: preset.color })}
+            >
+              <span
+                aria-hidden="true"
+                className="h-4 w-4 rounded-sm border border-line"
+                style={{ backgroundColor: textColorToPreviewHex(preset.color) }}
               />
-            </label>
+              {preset.label}
+            </button>
           ))}
         </div>
-      )}
+      </div>
+
+      <div className="grid grid-cols-4 gap-2">
+        {(["c", "m", "y", "k"] as const).map((channel) => (
+          <label key={channel} className="grid gap-1 text-xs font-semibold uppercase text-neutral-600">
+            {channel}
+            <input
+              className={controlClass}
+              type="number"
+              min="0"
+              max="100"
+              step="0.1"
+              value={cmykChannels[channel]}
+              onChange={(event) => updateCmyk(channel, Number(event.target.value))}
+            />
+          </label>
+        ))}
+      </div>
     </div>
   );
 }

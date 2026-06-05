@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
+  CMYK_COLOR_PRESETS,
   cmykToHexColor,
   hexToCmykChannels,
   normalizeHexColor,
@@ -10,6 +11,21 @@ import {
 import type { CmykColor } from "@/types/placecard";
 
 describe("print color helpers", () => {
+  it("provides built-in CMYK presets for print color entry", () => {
+    expect(CMYK_COLOR_PRESETS).toEqual([
+      {
+        id: "gold",
+        label: "Gold",
+        color: { mode: "cmyk", c: 10, m: 23, y: 91, k: 22 }
+      },
+      {
+        id: "100k-black",
+        label: "100K Black",
+        color: { mode: "cmyk", c: 0, m: 0, y: 0, k: 100 }
+      }
+    ]);
+  });
+
   it("normalizes hex colors for backwards-compatible settings", () => {
     expect(normalizeHexColor("#abc")).toBe("#aabbcc");
     expect(normalizeHexColor("202124")).toBe("#202124");

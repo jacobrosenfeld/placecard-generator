@@ -34,7 +34,7 @@ const defaultSettings: ProjectSettings = {
     align: "center",
     uppercase: false,
     maxLines: 2,
-    color: "#202124"
+    color: { mode: "cmyk", c: 0, m: 0, y: 0, k: 100 }
   },
   tableText: {
     fontFamily: "open-sans",
@@ -44,7 +44,7 @@ const defaultSettings: ProjectSettings = {
     align: "center",
     uppercase: false,
     maxLines: 1,
-    color: "#202124"
+    color: { mode: "cmyk", c: 0, m: 0, y: 0, k: 100 }
   }
 };
 

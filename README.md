@@ -29,10 +29,12 @@ This project is open source under the MIT License.
 - Imports CSV, XLSX, and XLS guest lists in the browser.
 - Supports column mapping, table-label cleanup, warnings, 2D preview, 3D fold
   preview, proof PDF, and print PDF export.
-- Supports hex and CMYK text color entry. Browser previews approximate CMYK
-  colors in RGB for on-screen display, while generated PDFs use CMYK color
-  operators for text and proof-guide drawing. Uploaded raster logos are
-  embedded as provided.
+- Supports CMYK text color entry with built-in presets for Gold
+  (`10,23,91,22`) and 100K Black (`0,0,0,100`). Browser previews approximate
+  CMYK colors in RGB for on-screen display, while generated PDFs use CMYK color
+  operators for text and proof-guide drawing. Legacy hex color state is
+  converted internally for compatibility. Uploaded raster logos are embedded as
+  provided.
 
 ## Local Development
 

@@ -9,8 +9,27 @@ export type CmykChannels = {
   k: number;
 };
 
+export type CmykPreset = {
+  id: string;
+  label: string;
+  color: CmykColor;
+};
+
 const FALLBACK_HEX = "#202124";
 const CHANNEL_MAX = 100;
+
+export const CMYK_COLOR_PRESETS: CmykPreset[] = [
+  {
+    id: "gold",
+    label: "Gold",
+    color: { mode: "cmyk", c: 10, m: 23, y: 91, k: 22 }
+  },
+  {
+    id: "100k-black",
+    label: "100K Black",
+    color: { mode: "cmyk", c: 0, m: 0, y: 0, k: 100 }
+  }
+];
 
 function clampChannel(value: number): number {
   if (!Number.isFinite(value)) return 0;
