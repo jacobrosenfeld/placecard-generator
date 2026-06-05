@@ -41,6 +41,12 @@ export const CURATED_FONTS: CuratedFont[] = [
   }
 ];
 
+export const GOOGLE_FONTS_PDF_HEADERS = {
+  Accept: "text/css",
+  "User-Agent":
+    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
+};
+
 export function getCuratedFont(fontFamily: string): CuratedFont {
   return CURATED_FONTS.find((font) => font.id === fontFamily) || CURATED_FONTS[0];
 }
@@ -72,7 +78,7 @@ export function googleFontsHref(value: string): string {
 }
 
 export function extractGoogleFontUrl(css: string): string | undefined {
-  const preferredFormatMatch = css.match(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)\s*format\('(truetype|opentype|woff2?|woff)'\)/);
+  const preferredFormatMatch = css.match(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)\s*format\('(truetype|opentype)'\)/);
   if (preferredFormatMatch?.[1]) return preferredFormatMatch[1];
 
   return css.match(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)/)?.[1];
@@ -86,7 +92,9 @@ export async function fetchGoogleFontBytes(value: string): Promise<Uint8Array | 
     return new Uint8Array(await response.arrayBuffer());
   }
 
-  const cssResponse = await fetch(googleFontsHref(value));
+  const cssResponse = await fetch(googleFontsHref(value), {
+    headers: GOOGLE_FONTS_PDF_HEADERS
+  });
   if (!cssResponse.ok) return undefined;
 
   const css = await cssResponse.text();

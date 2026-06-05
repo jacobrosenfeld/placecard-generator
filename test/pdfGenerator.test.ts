@@ -72,17 +72,19 @@ describe("PDF panel transforms", () => {
     ]);
   });
 
-  it("generates one flat unfolded page per card at the requested size", async () => {
+  it("generates front and back finished-size pages for each card", async () => {
     const bytes = await generatePlacecardPdf({
       settings,
       guests: [guest],
       outputMode: "single-up"
     });
     const pdf = await PDFDocument.load(bytes);
-    const [page] = pdf.getPages();
+    const pages = pdf.getPages();
 
-    expect(pdf.getPageCount()).toBe(1);
-    expect(page.getWidth()).toBe(252);
-    expect(page.getHeight()).toBe(288);
+    expect(pdf.getPageCount()).toBe(2);
+    expect(pages[0].getWidth()).toBe(252);
+    expect(pages[0].getHeight()).toBe(144);
+    expect(pages[1].getWidth()).toBe(252);
+    expect(pages[1].getHeight()).toBe(144);
   });
 });

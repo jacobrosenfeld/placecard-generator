@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from "next/server";
-import { extractGoogleFontUrl, googleFontsHref } from "@/lib/typography";
+import { extractGoogleFontUrl, GOOGLE_FONTS_PDF_HEADERS, googleFontsHref } from "@/lib/typography";
 
 export const runtime = "nodejs";
 
@@ -10,9 +10,7 @@ export async function GET(request: NextRequest) {
   }
 
   const cssResponse = await fetch(googleFontsHref(font), {
-    headers: {
-      Accept: "text/css"
-    },
+    headers: GOOGLE_FONTS_PDF_HEADERS,
     next: { revalidate: 60 * 60 * 24 * 30 }
   });
 

@@ -1,14 +1,16 @@
 # Placecard Generator
 
 Browser-first Next.js app for generating folded tent-card placecard proofs and
-single-up print PDFs.
+duplex-ready print PDFs.
 
 ## What It Does
 
 - Uses finished folded card size as input.
-- Builds the flat unfolded page geometry from one shared layout engine.
-- Rotates the top/name panel 180 degrees for horizontal tent cards.
-- Keeps the bottom/table panel in normal orientation.
+- Generates one exact finished-size front page and one exact finished-size back
+  page per guest.
+- Places the guest name on the front page and the table label on the back page
+  for duplex printing.
+- Uses shared geometry for safe margins, previews, and PDF page sizing.
 - Imports CSV, XLSX, and XLS guest lists in the browser.
 - Supports column mapping, table-label cleanup, warnings, 2D preview, 3D fold
   preview, proof PDF, and print PDF export.

@@ -13,23 +13,26 @@ export function CardPreview2D({
   guest?: GuestRow;
   settings: ProjectSettings;
 }) {
-  const ratio = layout.flatHeightPt / layout.flatWidthPt;
+  const ratio = layout.finishedHeightPt / layout.finishedWidthPt;
 
   return (
     <div className="border border-line bg-white p-4 shadow-tool">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-base font-semibold">Flat PDF Preview</h2>
+        <h2 className="text-base font-semibold">PDF Page Preview</h2>
         <span className="text-xs text-neutral-500">
-          {formatInchesFromPoints(layout.flatWidthPt)} x {formatInchesFromPoints(layout.flatHeightPt)}
+          {formatInchesFromPoints(layout.finishedWidthPt)} x {formatInchesFromPoints(layout.finishedHeightPt)}
         </span>
       </div>
-      <div
-        className="mx-auto w-full max-w-[360px] border border-ink bg-paper"
-        style={{ aspectRatio: `1 / ${ratio}` }}
-      >
-        <div className="grid h-full grid-rows-2">
+      <div className="grid gap-3 sm:grid-cols-2">
+        <div
+          className="mx-auto w-full max-w-[360px] border border-ink bg-paper"
+          style={{ aspectRatio: `1 / ${ratio}` }}
+        >
+          <div className="relative h-full">
+            <span className="absolute left-2 top-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
+              Front
+            </span>
           <PanelPreview
-            className="rotate-180 border-b border-dashed border-brass"
             text={guest?.name || "Guest Name"}
             logo={settings.includeLogo ? settings.logo?.dataUrl : undefined}
             showLogo={settings.logo?.placement === "above-name" || settings.logo?.placement === "both-panels"}
@@ -38,15 +41,26 @@ export function CardPreview2D({
             fontFamily={styleCssFontFamily(settings.nameText)}
             color={settings.nameText.color}
           />
+          </div>
+        </div>
+        <div
+          className="mx-auto w-full max-w-[360px] border border-ink bg-paper"
+          style={{ aspectRatio: `1 / ${ratio}` }}
+        >
+          <div className="relative h-full">
+            <span className="absolute left-2 top-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
+              Back
+            </span>
           <PanelPreview
             text={guest?.tableLabel || "Table 12"}
             logo={settings.includeLogo ? settings.logo?.dataUrl : undefined}
-            showLogo={settings.logo?.placement === "above-table"}
+            showLogo={settings.logo?.placement === "above-table" || settings.logo?.placement === "both-panels"}
             fontSize={settings.tableText.fontSize}
             weight={settings.tableText.fontWeight}
             fontFamily={styleCssFontFamily(settings.tableText)}
             color={settings.tableText.color}
           />
+          </div>
         </div>
       </div>
     </div>
@@ -73,7 +87,7 @@ function PanelPreview({
   className?: string;
 }) {
   return (
-    <div className={`flex min-h-0 flex-col items-center justify-center gap-2 p-5 text-center ${className}`}>
+    <div className={`flex h-full min-h-0 flex-col items-center justify-center gap-2 p-5 text-center ${className}`}>
       {showLogo && logo ? (
         // eslint-disable-next-line @next/next/no-img-element
         <img alt="" src={logo} className="max-h-[32%] max-w-[58%] object-contain" />

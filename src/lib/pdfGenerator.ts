@@ -122,6 +122,15 @@ function drawCenteredContent(params: {
   page.pushOperators(popGraphicsState());
 }
 
+function finishedPagePanel(layout: CardLayout): Rect {
+  return {
+    x: 0,
+    y: 0,
+    width: layout.finishedWidthPt,
+    height: layout.finishedHeightPt
+  };
+}
+
 async function embedStyleFont(pdfDoc: PDFDocument, style: TextStyle) {
   if (style.fontMode === "google") {
     try {
@@ -143,49 +152,35 @@ async function embedStyleFont(pdfDoc: PDFDocument, style: TextStyle) {
 function drawProofGuides(
   page: ReturnType<PDFDocument["addPage"]>,
   layout: CardLayout,
-  font: Awaited<ReturnType<PDFDocument["embedFont"]>>
+  font: Awaited<ReturnType<PDFDocument["embedFont"]>>,
+  sideLabel: string
 ) {
-  page.drawLine({
-    start: { x: 0, y: layout.foldLineY },
-    end: { x: layout.flatWidthPt, y: layout.foldLineY },
-    thickness: 0.5,
-    color: rgb(0.55, 0.35, 0.15),
-    dashArray: [4, 4]
-  });
-  page.drawText(`Fold line: ${formatInchesFromPoints(layout.foldLineY)} from bottom`, {
-    x: 8,
-    y: layout.foldLineY + 5,
-    size: 7,
-    font,
-    color: rgb(0.45, 0.28, 0.12)
-  });
+  const pagePanel = finishedPagePanel(layout);
+  const safe = insetRect(pagePanel, layout.safeMarginPt);
 
   page.drawText(
-    `Flat size: ${formatInchesFromPoints(layout.flatWidthPt)} x ${formatInchesFromPoints(layout.flatHeightPt)}`,
+    `${sideLabel} size: ${formatInchesFromPoints(layout.finishedWidthPt)} x ${formatInchesFromPoints(layout.finishedHeightPt)}`,
     {
       x: 8,
-      y: layout.flatHeightPt - 12,
+      y: layout.finishedHeightPt - 12,
       size: 7,
       font,
       color: rgb(0.45, 0.45, 0.45)
     }
   );
 
-  for (const panel of [layout.topPanel, layout.bottomPanel]) {
-    const safe = insetRect(panel, layout.safeMarginPt);
-    page.drawRectangle({
-      x: safe.x,
-      y: safe.y,
-      width: safe.width,
-      height: safe.height,
-      borderColor: rgb(0.72, 0.72, 0.72),
-      borderWidth: 0.35
-    });
-  }
+  page.drawRectangle({
+    x: safe.x,
+    y: safe.y,
+    width: safe.width,
+    height: safe.height,
+    borderColor: rgb(0.72, 0.72, 0.72),
+    borderWidth: 0.35
+  });
 
   page.drawText(`Safe margin: ${formatInchesFromPoints(layout.safeMarginPt)}`, {
     x: 8,
-    y: 20,
+    y: 8,
     size: 7,
     font,
     color: rgb(0.45, 0.45, 0.45)
@@ -200,27 +195,31 @@ export async function generatePlacecardPdf({ settings, guests, outputMode }: Gen
   const nameFont = await embedStyleFont(pdfDoc, settings.nameText);
   const tableFont = await embedStyleFont(pdfDoc, settings.tableText);
   const logoImage = await embedLogo(pdfDoc, settings.includeLogo ? settings.logo : undefined);
+  const pagePanel = finishedPagePanel(layout);
 
   guests.forEach((guest, index) => {
-    const page = pdfDoc.addPage([layout.flatWidthPt, layout.flatHeightPt]);
-    if (outputMode === "proof") drawProofGuides(page, layout, regularFont);
+    const frontPage = pdfDoc.addPage([layout.finishedWidthPt, layout.finishedHeightPt]);
+    if (outputMode === "proof") drawProofGuides(frontPage, layout, regularFont, `Front ${index + 1}`);
 
     drawCenteredContent({
-      page,
-      panel: layout.topPanel,
+      page: frontPage,
+      panel: pagePanel,
       layout,
       text: guest.name,
       style: settings.nameText,
       font: nameFont,
-      rotation: 180,
+      rotation: 0,
       logoImage,
       logo: settings.logo,
       drawLogo: settings.includeLogo && (settings.logo?.placement === "above-name" || settings.logo?.placement === "both-panels")
     });
 
+    const backPage = pdfDoc.addPage([layout.finishedWidthPt, layout.finishedHeightPt]);
+    if (outputMode === "proof") drawProofGuides(backPage, layout, regularFont, `Back ${index + 1}`);
+
     drawCenteredContent({
-      page,
-      panel: layout.bottomPanel,
+      page: backPage,
+      panel: pagePanel,
       layout,
       text: guest.tableLabel,
       style: settings.tableText,
@@ -228,13 +227,20 @@ export async function generatePlacecardPdf({ settings, guests, outputMode }: Gen
       rotation: 0,
       logoImage,
       logo: settings.logo,
-      drawLogo: settings.includeLogo && settings.logo?.placement === "above-table"
+      drawLogo: settings.includeLogo && (settings.logo?.placement === "above-table" || settings.logo?.placement === "both-panels")
     });
 
     if (outputMode === "proof") {
-      page.drawText(`Proof ${index + 1} of ${guests.length}`, {
+      frontPage.drawText(`Proof ${index + 1} of ${guests.length} front`, {
         x: 8,
-        y: 8,
+        y: 18,
+        size: 6,
+        font: regularFont,
+        color: rgb(0.45, 0.45, 0.45)
+      });
+      backPage.drawText(`Proof ${index + 1} of ${guests.length} back`, {
+        x: 8,
+        y: 18,
         size: 6,
         font: regularFont,
         color: rgb(0.45, 0.45, 0.45)
