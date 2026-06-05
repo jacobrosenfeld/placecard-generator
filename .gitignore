@@ -24,3 +24,5 @@ pnpm-debug.log*
 .DS_Store
 .idea/
 .vscode/
+placecard-generator-agent-instructions.md
+tsconfig.tsbuildinfo
