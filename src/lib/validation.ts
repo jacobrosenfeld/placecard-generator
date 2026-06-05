@@ -1,4 +1,5 @@
 import type { GuestRow, ProjectSettings } from "@/types/placecard";
+import { validateTextColor } from "./color";
 
 export function validateSettings(settings: ProjectSettings): string[] {
   const warnings: string[] = [];
@@ -12,6 +13,8 @@ export function validateSettings(settings: ProjectSettings): string[] {
   if (settings.includeLogo && settings.logo) {
     warnings.push(...settings.logo.warnings);
   }
+  warnings.push(...validateTextColor(settings.nameText.color, "Name color"));
+  warnings.push(...validateTextColor(settings.tableText.color, "Table color"));
   return warnings;
 }
 

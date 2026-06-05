@@ -1,6 +1,7 @@
 "use client";
 
 import type { CardLayout, GuestRow, ProjectSettings } from "@/types/placecard";
+import { textColorToPreviewHex } from "@/lib/color";
 import { styleCssFontFamily, styleCssFontWeight } from "@/lib/typography";
 import { formatInchesFromPoints } from "@/lib/units";
 
@@ -42,7 +43,7 @@ export function CardPreview2D({
                 weight={settings.nameText.fontWeight}
                 cssWeight={styleCssFontWeight(settings.nameText)}
                 fontFamily={styleCssFontFamily(settings.nameText)}
-                color={settings.nameText.color}
+                color={textColorToPreviewHex(settings.nameText.color)}
                 className="border-t border-dashed border-brass"
               />
             </div>
@@ -65,7 +66,7 @@ export function CardPreview2D({
                 weight={settings.tableText.fontWeight}
                 cssWeight={styleCssFontWeight(settings.tableText)}
                 fontFamily={styleCssFontFamily(settings.tableText)}
-                color={settings.tableText.color}
+                color={textColorToPreviewHex(settings.tableText.color)}
                 className="rotate-180 border-b border-dashed border-brass"
               />
               <BlankHalf label="Blank bottom" />

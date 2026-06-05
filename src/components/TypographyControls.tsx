@@ -1,6 +1,7 @@
 "use client";
 
 import type { FontWeight, ProjectSettings, TextStyle } from "@/types/placecard";
+import { isCmykColor, textColorToCmykChannels, textColorToPreviewHex } from "@/lib/color";
 import { availableFontWeights, CURATED_FONTS, FONT_WEIGHT_LABELS, normalizeFontWeight } from "@/lib/typography";
 import { controlClass, Field } from "./Field";
 
@@ -121,36 +122,18 @@ export function TypographyControls({
           </select>
         </Field>
         <Field label="Name color">
-          <div className="grid grid-cols-[48px_1fr] gap-2">
-            <input
-              aria-label="Name text color"
-              className="h-10 w-12 rounded-md border border-line bg-white p-1"
-              type="color"
-              value={settings.nameText.color}
-              onChange={(event) => onChange({ ...settings, nameText: updateTextStyle(settings.nameText, { color: event.target.value }) })}
-            />
-            <input
-              className={controlClass}
-              value={settings.nameText.color}
-              onChange={(event) => onChange({ ...settings, nameText: updateTextStyle(settings.nameText, { color: event.target.value }) })}
-            />
-          </div>
+          <TextColorControl
+            label="Name"
+            style={settings.nameText}
+            onChange={(style) => onChange({ ...settings, nameText: style })}
+          />
         </Field>
         <Field label="Table color">
-          <div className="grid grid-cols-[48px_1fr] gap-2">
-            <input
-              aria-label="Table text color"
-              className="h-10 w-12 rounded-md border border-line bg-white p-1"
-              type="color"
-              value={settings.tableText.color}
-              onChange={(event) => onChange({ ...settings, tableText: updateTextStyle(settings.tableText, { color: event.target.value }) })}
-            />
-            <input
-              className={controlClass}
-              value={settings.tableText.color}
-              onChange={(event) => onChange({ ...settings, tableText: updateTextStyle(settings.tableText, { color: event.target.value }) })}
-            />
-          </div>
+          <TextColorControl
+            label="Table"
+            style={settings.tableText}
+            onChange={(style) => onChange({ ...settings, tableText: style })}
+          />
         </Field>
       </div>
       <label className="flex items-center gap-2 text-sm font-medium">
@@ -162,5 +145,91 @@ export function TypographyControls({
         Set guest names in all caps
       </label>
     </section>
+  );
+}
+
+function TextColorControl({
+  label,
+  style,
+  onChange
+}: {
+  label: string;
+  style: TextStyle;
+  onChange: (style: TextStyle) => void;
+}) {
+  const mode = isCmykColor(style.color) ? "cmyk" : "hex";
+  const previewHex = textColorToPreviewHex(style.color);
+  const cmykChannels = textColorToCmykChannels(style.color);
+
+  function updateCmyk(channel: "c" | "m" | "y" | "k", value: number) {
+    onChange({
+      ...style,
+      color: {
+        mode: "cmyk",
+        ...cmykChannels,
+        [channel]: value
+      }
+    });
+  }
+
+  return (
+    <div className="grid gap-2">
+      <div className="grid grid-cols-[48px_1fr] gap-2">
+        <span
+          aria-label={`${label} text color preview`}
+          className="h-10 w-12 rounded-md border border-line"
+          style={{ backgroundColor: previewHex }}
+        />
+        <select
+          className={controlClass}
+          value={mode}
+          onChange={(event) => {
+            if (event.target.value === "cmyk") {
+              onChange({ ...style, color: { mode: "cmyk", ...cmykChannels } });
+              return;
+            }
+
+            onChange({ ...style, color: previewHex });
+          }}
+        >
+          <option value="hex">Hex</option>
+          <option value="cmyk">CMYK</option>
+        </select>
+      </div>
+
+      {mode === "hex" ? (
+        <div className="grid grid-cols-[48px_1fr] gap-2">
+          <input
+            aria-label={`${label} text color picker`}
+            className="h-10 w-12 rounded-md border border-line bg-white p-1"
+            type="color"
+            value={previewHex}
+            onChange={(event) => onChange({ ...style, color: event.target.value })}
+          />
+          <input
+            className={controlClass}
+            value={typeof style.color === "string" ? style.color : previewHex}
+            onChange={(event) => onChange({ ...style, color: event.target.value })}
+          />
+        </div>
+      ) : (
+        <div className="grid grid-cols-4 gap-2">
+          {(["c", "m", "y", "k"] as const).map((channel) => (
+            <label key={channel} className="grid gap-1 text-xs font-semibold uppercase text-neutral-600">
+              {channel}
+              <input
+                className={controlClass}
+                type="number"
+                min="0"
+                max="100"
+                step="0.1"
+                value={cmykChannels[channel]}
+                onChange={(event) => updateCmyk(channel, Number(event.target.value))}
+              />
+            </label>
+          ))}
+        </div>
+      )}
+    </div>
   );
 }

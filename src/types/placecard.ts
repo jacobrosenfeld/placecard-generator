@@ -6,6 +6,16 @@ export type OutputMode = "single-up" | "proof";
 
 export type FontWeight = "light" | "normal" | "bold";
 
+export type CmykColor = {
+  mode: "cmyk";
+  c: number;
+  m: number;
+  y: number;
+  k: number;
+};
+
+export type TextColor = string | CmykColor;
+
 export type Rect = {
   x: number;
   y: number;
@@ -33,7 +43,7 @@ export type TextStyle = {
   align: "left" | "center" | "right";
   uppercase: boolean;
   maxLines: number;
-  color: string;
+  color: TextColor;
 };
 
 export type LogoPlacement =

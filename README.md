@@ -29,6 +29,10 @@ This project is open source under the MIT License.
 - Imports CSV, XLSX, and XLS guest lists in the browser.
 - Supports column mapping, table-label cleanup, warnings, 2D preview, 3D fold
   preview, proof PDF, and print PDF export.
+- Supports hex and CMYK text color entry. Browser previews approximate CMYK
+  colors in RGB for on-screen display, while generated PDFs use CMYK color
+  operators for text and proof-guide drawing. Uploaded raster logos are
+  embedded as provided.
 
 ## Local Development
 
@@ -82,10 +86,13 @@ Status of tracked issues (closed = implemented):
 - [#8 Build the 3D folded preview and proof mode](https://github.com/jacobrosenfeld/placecard-generator/issues/8) — Closed
 - [#9 Add test coverage for geometry, parsing, and export behavior](https://github.com/jacobrosenfeld/placecard-generator/issues/9) — Closed
 - [#10 Add validation, normalization, and warning rules](https://github.com/jacobrosenfeld/placecard-generator/issues/10) — Closed
-- [#11 Add a curated font chooser with Google Fonts override](https://github.com/jacobrosenfeld/placecard-generator/issues/11) — Closed (implemented)
-- [#12 Show app version in the site footer](https://github.com/jacobrosenfeld/placecard-generator/issues/12) — Open (enhancement)
+- [#11 Add a curated font chooser with Google Fonts override](https://github.com/jacobrosenfeld/placecard-generator/issues/11) — Closed (implemented as bundled curated fonts)
+- [#12 Show app version in the site footer](https://github.com/jacobrosenfeld/placecard-generator/issues/12) — Closed
 - [#13 Add simple password protection from config](https://github.com/jacobrosenfeld/placecard-generator/issues/13) — Open
 - [#14 Add small caps option for names and tables](https://github.com/jacobrosenfeld/placecard-generator/issues/14) — Open
+- [#15 Add GitHub repo link to footer](https://github.com/jacobrosenfeld/placecard-generator/issues/15) — Closed
+- [#16 Add CMYK color options](https://github.com/jacobrosenfeld/placecard-generator/issues/16) — Closed
+- [#17 Generate PDFs using CMYK output](https://github.com/jacobrosenfeld/placecard-generator/issues/17) — Closed
 
 If you'd like any of the remaining open issues closed or need follow-ups, tell me which ones and I'll either close them or ask for clarification.
 

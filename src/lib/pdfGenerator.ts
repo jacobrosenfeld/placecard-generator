@@ -1,7 +1,7 @@
 import {
   PDFDocument,
   StandardFonts,
-  rgb,
+  cmyk,
   concatTransformationMatrix,
   popGraphicsState,
   pushGraphicsState
@@ -11,7 +11,7 @@ import { buildCardLayout, insetRect } from "./layoutEngine";
 import { fitTextToBox } from "./textFit";
 import { createTextRenderer } from "./pdfTextRenderer";
 import type { PdfTextRenderer } from "./pdfTextRenderer";
-import { hexToPdfRgb } from "./typography";
+import { textColorToPdfCmyk } from "./color";
 import { formatInchesFromPoints } from "./units";
 
 type GeneratePdfInput = {
@@ -116,7 +116,7 @@ function drawCenteredContent(params: {
       x,
       y,
       fontSize: fitted.fontSize,
-      color: hexToPdfRgb(style.color)
+      color: textColorToPdfCmyk(style.color)
     });
   });
 
@@ -133,7 +133,7 @@ function drawProofGuides(
     start: { x: 0, y: layout.foldLineY },
     end: { x: layout.flatWidthPt, y: layout.foldLineY },
     thickness: 0.5,
-    color: rgb(0.55, 0.35, 0.15),
+    color: cmyk(0, 0.36, 0.73, 0.45),
     dashArray: [4, 4]
   });
 
@@ -144,7 +144,7 @@ function drawProofGuides(
       y: layout.flatHeightPt - 12,
       size: 7,
       font,
-      color: rgb(0.45, 0.45, 0.45)
+      color: cmyk(0, 0, 0, 0.55)
     }
   );
 
@@ -155,7 +155,7 @@ function drawProofGuides(
       y: safe.y,
       width: safe.width,
       height: safe.height,
-      borderColor: rgb(0.72, 0.72, 0.72),
+      borderColor: cmyk(0, 0, 0, 0.28),
       borderWidth: 0.35
     });
   }
@@ -165,7 +165,7 @@ function drawProofGuides(
     y: 8,
     size: 7,
     font,
-    color: rgb(0.45, 0.45, 0.45)
+    color: cmyk(0, 0, 0, 0.55)
   });
 }
 
@@ -216,14 +216,14 @@ export async function generatePlacecardPdf({ settings, guests, outputMode }: Gen
         y: 18,
         size: 6,
         font: regularFont,
-        color: rgb(0.45, 0.45, 0.45)
+        color: cmyk(0, 0, 0, 0.55)
       });
       tablePage.drawText(`Proof ${index + 1} of ${guests.length} side 2`, {
         x: 8,
         y: 18,
         size: 6,
         font: regularFont,
-        color: rgb(0.45, 0.45, 0.45)
+        color: cmyk(0, 0, 0, 0.55)
       });
     }
   });
