@@ -35,3 +35,40 @@ This repository is a browser-first Next.js app for generating folded tent-card p
 - Project overview and workflow details: `README.md`
 - Existing agent-oriented guidance: `placecard-generator-agent-instructions.md`
 - Licensing and third-party notices: `LICENSE` and `THIRD_PARTY_NOTICES.md`
+
+## Adding & Bundling Fonts
+
+When we add curated/bundled fonts to the app, follow these steps so future agents can quickly roll out new font families consistently and safely.
+
+- Files & location:
+  - Add font files (TTF/OTF) to `public/fonts/`.
+  - Include the font license and attribution in `public/fonts/` (e.g., `OFL.txt`), and ensure any bundled fonts comply with licensing.
+
+- Code changes (single place):
+  - Edit `src/lib/typography.ts` and add a `CuratedFont` entry to the `CURATED_FONTS` array. Provide:
+    - `id`: short slug (used in settings and internal calls).
+    - `label`: human-friendly name shown in the UI.
+    - `cssFamily`: CSS font-family string to use in previews and pages.
+    - `weights`: list of supported weights (`light|normal|bold`).
+    - `fontFileUrls`: map each weight to the corresponding `/fonts/` file path.
+    - `syntheticBold` (optional): set to `true` when the font lacks a bold face and the UI should synthesize it.
+  - Example entry is already present in `src/lib/typography.ts`; copy that shape.
+
+- PDF embedding:
+  - `src/lib/pdfTextRenderer.ts` calls `fetchCuratedFontBytes()` from `src/lib/typography.ts` and fetches the font bytes by the `fontFileUrls` path. Use TTF/OTF files for best compatibility.
+  - No additional server changes are required if the font files are reachable under `/fonts/...`.
+
+- UI & tests:
+  - `src/components/TypographyControls.tsx` reads `CURATED_FONTS` to populate the font picker — adding the entry will expose the font in the UI automatically.
+  - Add or update tests in `test/typography.test.ts` to cover any helper behavior (e.g., `normalizeFontWeight`, `availableFontWeights`).
+
+- PR checklist for adding a font:
+  1. Add font files to `public/fonts/` and commit the license text.
+  2. Add a `CURATED_FONTS` entry in `src/lib/typography.ts` using the existing entries as examples.
+  3. Run `npm run test` and verify `test/typography.test.ts` passes.
+  4. Launch the dev server and verify the new font appears in the font picker and renders correctly in both previews.
+  5. Generate a Proof PDF and verify the font is embedded and renders correctly in the exported file.
+  6. Include a short note in the PR description about the font source and license (link to font project/author).
+
+If you need to support web-hosted fonts (Google Fonts) instead of bundling files, add a short note in the PR and ensure PDF embedding falls back to a bundled font for exports.
+
