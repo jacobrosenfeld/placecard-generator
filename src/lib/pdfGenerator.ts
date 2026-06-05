@@ -122,15 +122,6 @@ function drawCenteredContent(params: {
   page.pushOperators(popGraphicsState());
 }
 
-function finishedPagePanel(layout: CardLayout): Rect {
-  return {
-    x: 0,
-    y: 0,
-    width: layout.finishedWidthPt,
-    height: layout.finishedHeightPt
-  };
-}
-
 async function embedStyleFont(pdfDoc: PDFDocument, style: TextStyle) {
   if (style.fontMode === "google") {
     try {
@@ -155,28 +146,36 @@ function drawProofGuides(
   font: Awaited<ReturnType<PDFDocument["embedFont"]>>,
   sideLabel: string
 ) {
-  const pagePanel = finishedPagePanel(layout);
-  const safe = insetRect(pagePanel, layout.safeMarginPt);
+  page.drawLine({
+    start: { x: 0, y: layout.foldLineY },
+    end: { x: layout.flatWidthPt, y: layout.foldLineY },
+    thickness: 0.5,
+    color: rgb(0.55, 0.35, 0.15),
+    dashArray: [4, 4]
+  });
 
   page.drawText(
-    `${sideLabel} size: ${formatInchesFromPoints(layout.finishedWidthPt)} x ${formatInchesFromPoints(layout.finishedHeightPt)}`,
+    `${sideLabel}: ${formatInchesFromPoints(layout.flatWidthPt)} x ${formatInchesFromPoints(layout.flatHeightPt)}`,
     {
       x: 8,
-      y: layout.finishedHeightPt - 12,
+      y: layout.flatHeightPt - 12,
       size: 7,
       font,
       color: rgb(0.45, 0.45, 0.45)
     }
   );
 
-  page.drawRectangle({
-    x: safe.x,
-    y: safe.y,
-    width: safe.width,
-    height: safe.height,
-    borderColor: rgb(0.72, 0.72, 0.72),
-    borderWidth: 0.35
-  });
+  for (const panel of [layout.topPanel, layout.bottomPanel]) {
+    const safe = insetRect(panel, layout.safeMarginPt);
+    page.drawRectangle({
+      x: safe.x,
+      y: safe.y,
+      width: safe.width,
+      height: safe.height,
+      borderColor: rgb(0.72, 0.72, 0.72),
+      borderWidth: 0.35
+    });
+  }
 
   page.drawText(`Safe margin: ${formatInchesFromPoints(layout.safeMarginPt)}`, {
     x: 8,
@@ -195,15 +194,14 @@ export async function generatePlacecardPdf({ settings, guests, outputMode }: Gen
   const nameFont = await embedStyleFont(pdfDoc, settings.nameText);
   const tableFont = await embedStyleFont(pdfDoc, settings.tableText);
   const logoImage = await embedLogo(pdfDoc, settings.includeLogo ? settings.logo : undefined);
-  const pagePanel = finishedPagePanel(layout);
 
   guests.forEach((guest, index) => {
-    const frontPage = pdfDoc.addPage([layout.finishedWidthPt, layout.finishedHeightPt]);
-    if (outputMode === "proof") drawProofGuides(frontPage, layout, regularFont, `Front ${index + 1}`);
+    const namePage = pdfDoc.addPage([layout.flatWidthPt, layout.flatHeightPt]);
+    if (outputMode === "proof") drawProofGuides(namePage, layout, regularFont, `Side 1 name ${index + 1}`);
 
     drawCenteredContent({
-      page: frontPage,
-      panel: pagePanel,
+      page: namePage,
+      panel: layout.bottomPanel,
       layout,
       text: guest.name,
       style: settings.nameText,
@@ -214,31 +212,31 @@ export async function generatePlacecardPdf({ settings, guests, outputMode }: Gen
       drawLogo: settings.includeLogo && (settings.logo?.placement === "above-name" || settings.logo?.placement === "both-panels")
     });
 
-    const backPage = pdfDoc.addPage([layout.finishedWidthPt, layout.finishedHeightPt]);
-    if (outputMode === "proof") drawProofGuides(backPage, layout, regularFont, `Back ${index + 1}`);
+    const tablePage = pdfDoc.addPage([layout.flatWidthPt, layout.flatHeightPt]);
+    if (outputMode === "proof") drawProofGuides(tablePage, layout, regularFont, `Side 2 table ${index + 1}`);
 
     drawCenteredContent({
-      page: backPage,
-      panel: pagePanel,
+      page: tablePage,
+      panel: layout.topPanel,
       layout,
       text: guest.tableLabel,
       style: settings.tableText,
       font: tableFont,
-      rotation: 0,
+      rotation: 180,
       logoImage,
       logo: settings.logo,
       drawLogo: settings.includeLogo && (settings.logo?.placement === "above-table" || settings.logo?.placement === "both-panels")
     });
 
     if (outputMode === "proof") {
-      frontPage.drawText(`Proof ${index + 1} of ${guests.length} front`, {
+      namePage.drawText(`Proof ${index + 1} of ${guests.length} side 1`, {
         x: 8,
         y: 18,
         size: 6,
         font: regularFont,
         color: rgb(0.45, 0.45, 0.45)
       });
-      backPage.drawText(`Proof ${index + 1} of ${guests.length} back`, {
+      tablePage.drawText(`Proof ${index + 1} of ${guests.length} side 2`, {
         x: 8,
         y: 18,
         size: 6,

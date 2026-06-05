@@ -136,9 +136,9 @@ export default function NewProjectPage() {
                 </p>
               )}
               <div className="mt-4 grid grid-cols-2 gap-2 text-xs text-neutral-600">
-                <span>Page size: {formatInchesFromPoints(layout.finishedWidthPt)} x {formatInchesFromPoints(layout.finishedHeightPt)}</span>
-                <span>Pages: front name, back table</span>
-                <span>Duplex order: front then back</span>
+                <span>Page size: {formatInchesFromPoints(layout.flatWidthPt)} x {formatInchesFromPoints(layout.flatHeightPt)}</span>
+                <span>Side 1: name on bottom</span>
+                <span>Side 2: table on top rotated</span>
                 <span>Safe margin: {formatInchesFromPoints(layout.safeMarginPt)}</span>
               </div>
             </section>

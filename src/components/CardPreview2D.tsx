@@ -13,14 +13,14 @@ export function CardPreview2D({
   guest?: GuestRow;
   settings: ProjectSettings;
 }) {
-  const ratio = layout.finishedHeightPt / layout.finishedWidthPt;
+  const ratio = layout.flatHeightPt / layout.flatWidthPt;
 
   return (
     <div className="border border-line bg-white p-4 shadow-tool">
       <div className="mb-3 flex items-center justify-between gap-3">
-        <h2 className="text-base font-semibold">PDF Page Preview</h2>
+        <h2 className="text-base font-semibold">Imposed PDF Preview</h2>
         <span className="text-xs text-neutral-500">
-          {formatInchesFromPoints(layout.finishedWidthPt)} x {formatInchesFromPoints(layout.finishedHeightPt)}
+          {formatInchesFromPoints(layout.flatWidthPt)} x {formatInchesFromPoints(layout.flatHeightPt)}
         </span>
       </div>
       <div className="grid gap-3 sm:grid-cols-2">
@@ -30,17 +30,21 @@ export function CardPreview2D({
         >
           <div className="relative h-full">
             <span className="absolute left-2 top-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
-              Front
+              Side 1
             </span>
-          <PanelPreview
-            text={guest?.name || "Guest Name"}
-            logo={settings.includeLogo ? settings.logo?.dataUrl : undefined}
-            showLogo={settings.logo?.placement === "above-name" || settings.logo?.placement === "both-panels"}
-            fontSize={settings.nameText.fontSize}
-            weight={settings.nameText.fontWeight}
-            fontFamily={styleCssFontFamily(settings.nameText)}
-            color={settings.nameText.color}
-          />
+            <div className="grid h-full grid-rows-2">
+              <BlankHalf label="Blank top" />
+              <PanelPreview
+                text={guest?.name || "Guest Name"}
+                logo={settings.includeLogo ? settings.logo?.dataUrl : undefined}
+                showLogo={settings.logo?.placement === "above-name" || settings.logo?.placement === "both-panels"}
+                fontSize={settings.nameText.fontSize}
+                weight={settings.nameText.fontWeight}
+                fontFamily={styleCssFontFamily(settings.nameText)}
+                color={settings.nameText.color}
+                className="border-t border-dashed border-brass"
+              />
+            </div>
           </div>
         </div>
         <div
@@ -49,20 +53,32 @@ export function CardPreview2D({
         >
           <div className="relative h-full">
             <span className="absolute left-2 top-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
-              Back
+              Side 2
             </span>
-          <PanelPreview
-            text={guest?.tableLabel || "Table 12"}
-            logo={settings.includeLogo ? settings.logo?.dataUrl : undefined}
-            showLogo={settings.logo?.placement === "above-table" || settings.logo?.placement === "both-panels"}
-            fontSize={settings.tableText.fontSize}
-            weight={settings.tableText.fontWeight}
-            fontFamily={styleCssFontFamily(settings.tableText)}
-            color={settings.tableText.color}
-          />
+            <div className="grid h-full grid-rows-2">
+              <PanelPreview
+                text={guest?.tableLabel || "Table 12"}
+                logo={settings.includeLogo ? settings.logo?.dataUrl : undefined}
+                showLogo={settings.logo?.placement === "above-table" || settings.logo?.placement === "both-panels"}
+                fontSize={settings.tableText.fontSize}
+                weight={settings.tableText.fontWeight}
+                fontFamily={styleCssFontFamily(settings.tableText)}
+                color={settings.tableText.color}
+                className="rotate-180 border-b border-dashed border-brass"
+              />
+              <BlankHalf label="Blank bottom" />
+            </div>
           </div>
         </div>
       </div>
+    </div>
+  );
+}
+
+function BlankHalf({ label }: { label: string }) {
+  return (
+    <div className="flex h-full items-center justify-center text-[10px] font-semibold uppercase tracking-wide text-neutral-300">
+      {label}
     </div>
   );
 }

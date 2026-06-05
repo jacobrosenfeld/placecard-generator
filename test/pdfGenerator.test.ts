@@ -72,7 +72,7 @@ describe("PDF panel transforms", () => {
     ]);
   });
 
-  it("generates front and back finished-size pages for each card", async () => {
+  it("generates two imposed full-flat pages for each card", async () => {
     const bytes = await generatePlacecardPdf({
       settings,
       guests: [guest],
@@ -83,8 +83,8 @@ describe("PDF panel transforms", () => {
 
     expect(pdf.getPageCount()).toBe(2);
     expect(pages[0].getWidth()).toBe(252);
-    expect(pages[0].getHeight()).toBe(144);
+    expect(pages[0].getHeight()).toBe(288);
     expect(pages[1].getWidth()).toBe(252);
-    expect(pages[1].getHeight()).toBe(144);
+    expect(pages[1].getHeight()).toBe(288);
   });
 });
