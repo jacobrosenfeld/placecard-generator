@@ -13,6 +13,10 @@ type GlyphPosition = {
 
 type Glyph = {
   path?: {
+    commands?: {
+      command: string;
+      args: number[];
+    }[];
     toSVG: () => string;
   };
 };
@@ -52,6 +56,25 @@ export function createStandardTextRenderer(font: PDFFont): PdfTextRenderer {
   };
 }
 
+export function fontPathToPdfLibSvgPath(path: NonNullable<Glyph["path"]>): string {
+  if (!path.commands) return path.toSVG();
+
+  return path.commands
+    .map(({ command, args }) => {
+      if (command === "moveTo") return `M${args[0]} ${-args[1]}`;
+      if (command === "lineTo") return `L${args[0]} ${-args[1]}`;
+      if (command === "quadraticCurveTo") return `Q${args[0]} ${-args[1]} ${args[2]} ${-args[3]}`;
+      if (command === "bezierCurveTo") {
+        return `C${args[0]} ${-args[1]} ${args[2]} ${-args[3]} ${args[4]} ${-args[5]}`;
+      }
+      if (command === "closePath") return "Z";
+
+      return "";
+    })
+    .filter(Boolean)
+    .join("");
+}
+
 export function createOutlineTextRenderer(fontBytes: Uint8Array): PdfTextRenderer {
   const font = fontkit.create(fontBytes) as FontkitFont;
 
@@ -71,7 +94,7 @@ export function createOutlineTextRenderer(fontBytes: Uint8Array): PdfTextRendere
 
       run.glyphs.forEach((glyph, index) => {
         const position = run.positions[index];
-        const path = glyph.path?.toSVG();
+        const path = glyph.path ? fontPathToPdfLibSvgPath(glyph.path) : undefined;
 
         if (path) {
           page.drawSvgPath(path, {
