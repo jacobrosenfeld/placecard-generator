@@ -41,6 +41,7 @@ export type TextStyle = {
   minFontSize: number;
   fontWeight: FontWeight;
   uppercase: boolean;
+  smallCaps: boolean;
   maxLines: number;
   color: TextColor;
 };

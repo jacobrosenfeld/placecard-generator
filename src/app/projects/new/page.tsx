@@ -32,6 +32,7 @@ const defaultSettings: ProjectSettings = {
     minFontSize: 12,
     fontWeight: "bold",
     uppercase: false,
+    smallCaps: false,
     maxLines: 2,
     color: { mode: "cmyk", c: 0, m: 0, y: 0, k: 100 }
   },
@@ -41,6 +42,7 @@ const defaultSettings: ProjectSettings = {
     minFontSize: 10,
     fontWeight: "bold",
     uppercase: false,
+    smallCaps: false,
     maxLines: 1,
     color: { mode: "cmyk", c: 0, m: 0, y: 0, k: 100 }
   }

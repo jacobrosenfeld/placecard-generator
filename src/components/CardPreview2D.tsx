@@ -2,6 +2,7 @@
 
 import type { CardLayout, GuestRow, ProjectSettings } from "@/types/placecard";
 import { textColorToPreviewHex } from "@/lib/color";
+import { displayTextForStyle } from "@/lib/textStyleRuns";
 import { styleCssFontFamily, styleCssFontWeight } from "@/lib/typography";
 import { formatInchesFromPoints } from "@/lib/units";
 
@@ -44,6 +45,8 @@ export function CardPreview2D({
                 cssWeight={styleCssFontWeight(settings.nameText)}
                 fontFamily={styleCssFontFamily(settings.nameText)}
                 color={textColorToPreviewHex(settings.nameText.color)}
+                uppercase={settings.nameText.uppercase}
+                smallCaps={settings.nameText.smallCaps}
                 className="border-t border-dashed border-brass"
               />
             </div>
@@ -67,6 +70,8 @@ export function CardPreview2D({
                 cssWeight={styleCssFontWeight(settings.tableText)}
                 fontFamily={styleCssFontFamily(settings.tableText)}
                 color={textColorToPreviewHex(settings.tableText.color)}
+                uppercase={settings.tableText.uppercase}
+                smallCaps={settings.tableText.smallCaps}
                 className="rotate-180 border-b border-dashed border-brass"
               />
               <BlankHalf label="Blank bottom" />
@@ -95,6 +100,8 @@ function PanelPreview({
   cssWeight,
   fontFamily,
   color,
+  uppercase,
+  smallCaps,
   className = ""
 }: {
   text: string;
@@ -105,6 +112,8 @@ function PanelPreview({
   cssWeight: number;
   fontFamily: string;
   color: string;
+  uppercase: boolean;
+  smallCaps: boolean;
   className?: string;
 }) {
   return (
@@ -120,10 +129,11 @@ function PanelPreview({
           fontFamily,
           fontSize: `${Math.min(fontSize, 34)}px`,
           fontWeight: cssWeight,
+          fontVariantCaps: smallCaps ? "small-caps" : undefined,
           WebkitTextStroke: weight === "bold" ? "0.2px currentColor" : undefined
         }}
       >
-        {text}
+        {displayTextForStyle(text, { uppercase })}
       </div>
     </div>
   );

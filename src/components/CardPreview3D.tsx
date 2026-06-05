@@ -1,7 +1,9 @@
 "use client";
 
+import type { CSSProperties } from "react";
 import type { GuestRow, ProjectSettings } from "@/types/placecard";
 import { textColorToPreviewHex } from "@/lib/color";
+import { displayTextForStyle } from "@/lib/textStyleRuns";
 import { styleCssFontFamily, styleCssFontWeight } from "@/lib/typography";
 
 export type PreviewState = "flat" | "folded" | "rotating" | "open";
@@ -18,16 +20,18 @@ export function CardPreview3D({
   onStateChange: (state: PreviewState) => void;
 }) {
   const showFlatRotation = state === "flat";
-  const nameStyle = {
+  const nameStyle: CSSProperties = {
     color: textColorToPreviewHex(settings.nameText.color),
     fontFamily: styleCssFontFamily(settings.nameText),
     fontWeight: styleCssFontWeight(settings.nameText),
+    fontVariantCaps: settings.nameText.smallCaps ? "small-caps" : undefined,
     WebkitTextStroke: settings.nameText.fontWeight === "bold" ? "0.2px currentColor" : undefined
   };
-  const tableStyle = {
+  const tableStyle: CSSProperties = {
     color: textColorToPreviewHex(settings.tableText.color),
     fontFamily: styleCssFontFamily(settings.tableText),
     fontWeight: styleCssFontWeight(settings.tableText),
+    fontVariantCaps: settings.tableText.smallCaps ? "small-caps" : undefined,
     WebkitTextStroke: settings.tableText.fontWeight === "bold" ? "0.2px currentColor" : undefined
   };
 
@@ -64,14 +68,16 @@ export function CardPreview3D({
               className={`card3d-name-content text-xl leading-tight transition-transform duration-500 ${showFlatRotation ? "rotate-180" : ""}`}
               style={nameStyle}
             >
-              {guest?.name || "Guest Name"}
+              {displayTextForStyle(guest?.name || "Guest Name", settings.nameText)}
             </span>
           </div>
           <div className="card3d-panel card3d-bottom absolute bottom-0 left-0 flex h-1/2 w-full items-center justify-center border border-t-0 border-ink bg-[#fffdf8] p-5 text-center shadow-sm transition-transform duration-700">
             <span className="absolute left-2 top-2 text-[10px] font-semibold uppercase tracking-wide text-neutral-400">
               Inside
             </span>
-            <span className="text-lg" style={tableStyle}>{guest?.tableLabel || "Table 12"}</span>
+            <span className="text-lg" style={tableStyle}>
+              {displayTextForStyle(guest?.tableLabel || "Table 12", settings.tableText)}
+            </span>
           </div>
         </div>
       </div>

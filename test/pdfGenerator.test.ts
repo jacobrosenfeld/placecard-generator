@@ -22,6 +22,7 @@ const settings: ProjectSettings = {
     minFontSize: 12,
     fontWeight: "bold",
     uppercase: false,
+    smallCaps: false,
     maxLines: 2,
     color: { mode: "cmyk", c: 10, m: 20, y: 30, k: 40 }
   },
@@ -31,6 +32,7 @@ const settings: ProjectSettings = {
     minFontSize: 10,
     fontWeight: "normal",
     uppercase: false,
+    smallCaps: false,
     maxLines: 1,
     color: "#202124"
   }
@@ -124,11 +126,12 @@ describe("PDF panel transforms", () => {
 
     expect(pdf.getPageCount()).toBe(3);
     expect(metadataLines).toContain("Proof PDF metadata");
-    expect(metadataLines).toContain("Name text: EB Garamond Bold | 30pt | min 12pt | 2 max lines | uppercase no | color C10 M20 Y30 K40");
-    expect(metadataLines).toContain("Table text: Open Sans Regular | 18pt | min 10pt | 1 max line | uppercase no | color C11.11 M8.33 Y0 K85.88 from #202124");
+    expect(metadataLines).toContain("Name text: EB Garamond Bold | 30pt | min 12pt | 2 max lines | uppercase no | small caps no | color C10 M20 Y30 K40");
+    expect(metadataLines).toContain("Table text: Open Sans Regular | 18pt | min 10pt | 1 max line | uppercase no | small caps no | color C11.11 M8.33 Y0 K85.88 from #202124");
     expect(readableStreams).toContain("Proof PDF metadata");
     expect(readableStreams).toContain("Name text: EB Garamond Bold");
-    expect(readableStreams).toContain("color C10 M20 Y30 K40");
+    expect(readableStreams).toContain("small caps no");
+    expect(readableStreams).toContain("Y30 K40");
   });
 
   it("emits CMYK color operators in generated PDF content", async () => {

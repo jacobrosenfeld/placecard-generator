@@ -118,14 +118,32 @@ export function TypographyControls({
           />
         </Field>
       </div>
-      <label className="flex items-center gap-2 text-sm font-medium">
-        <input
-          type="checkbox"
-          checked={settings.nameText.uppercase}
-          onChange={(event) => onChange({ ...settings, nameText: updateTextStyle(settings.nameText, { uppercase: event.target.checked }) })}
-        />
-        Set guest names in all caps
-      </label>
+      <div className="grid gap-2 sm:grid-cols-3">
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            checked={settings.nameText.uppercase}
+            onChange={(event) => onChange({ ...settings, nameText: updateTextStyle(settings.nameText, { uppercase: event.target.checked }) })}
+          />
+          Set guest names in all caps
+        </label>
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            checked={settings.nameText.smallCaps}
+            onChange={(event) => onChange({ ...settings, nameText: updateTextStyle(settings.nameText, { smallCaps: event.target.checked }) })}
+          />
+          Small caps for names
+        </label>
+        <label className="flex items-center gap-2 text-sm font-medium">
+          <input
+            type="checkbox"
+            checked={settings.tableText.smallCaps}
+            onChange={(event) => onChange({ ...settings, tableText: updateTextStyle(settings.tableText, { smallCaps: event.target.checked }) })}
+          />
+          Small caps for tables
+        </label>
+      </div>
     </section>
   );
 }

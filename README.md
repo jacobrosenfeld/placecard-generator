@@ -29,6 +29,8 @@ This project is open source under the MIT License.
 - Imports CSV, XLSX, and XLS guest lists in the browser.
 - Supports column mapping, table-label cleanup, warnings, 2D preview, 3D fold
   preview, proof PDF, and print PDF export.
+- Supports independent small-caps typography settings for guest names and table
+  labels across previews and PDF export.
 - Supports CMYK text color choosing with exact numeric entry and built-in
   presets for Gold
   (`10,23,91,22`) and 100K Black (`0,0,0,100`). Browser previews approximate
@@ -96,7 +98,7 @@ Status of tracked issues (closed = implemented):
 - [#11 Add a curated font chooser with Google Fonts override](https://github.com/jacobrosenfeld/placecard-generator/issues/11) — Closed (implemented as bundled curated fonts)
 - [#12 Show app version in the site footer](https://github.com/jacobrosenfeld/placecard-generator/issues/12) — Closed
 - [#13 Add simple password protection from config](https://github.com/jacobrosenfeld/placecard-generator/issues/13) — Open
-- [#14 Add small caps option for names and tables](https://github.com/jacobrosenfeld/placecard-generator/issues/14) — Open
+- [#14 Add small caps option for names and tables](https://github.com/jacobrosenfeld/placecard-generator/issues/14) — Closed
 - [#15 Add GitHub repo link to footer](https://github.com/jacobrosenfeld/placecard-generator/issues/15) — Closed
 - [#16 Add CMYK color options](https://github.com/jacobrosenfeld/placecard-generator/issues/16) — Closed
 - [#17 Generate PDFs using CMYK output](https://github.com/jacobrosenfeld/placecard-generator/issues/17) — Closed

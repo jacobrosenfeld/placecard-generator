@@ -12,6 +12,7 @@ import { fitTextToBox } from "./textFit";
 import { createTextRenderer } from "./pdfTextRenderer";
 import type { PdfTextRenderer } from "./pdfTextRenderer";
 import { isCmykColor, textColorToCmykChannels, textColorToPdfCmyk, textColorToPreviewHex } from "./color";
+import { displayTextForStyle, styledTextRuns } from "./textStyleRuns";
 import { FONT_WEIGHT_LABELS, getCuratedFont, normalizeFontWeight } from "./typography";
 import { formatInchesFromPoints } from "./units";
 
@@ -67,6 +68,7 @@ function formatTextStyleMetadata(label: string, style: TextStyle): string {
     `min ${formatNumber(style.minFontSize)}pt`,
     `${style.maxLines} max line${style.maxLines === 1 ? "" : "s"}`,
     `uppercase ${style.uppercase ? "yes" : "no"}`,
+    `small caps ${style.smallCaps ? "yes" : "no"}`,
     `color ${formatCmykText(style.color)}`
   ].join(" | ");
 }
@@ -149,10 +151,12 @@ function drawCenteredContent(params: {
 }) {
   const { page, panel, layout, style, textRenderer, rotation, logoImage, logo, drawLogo } = params;
   const safePanel = insetRect(panel, layout.safeMarginPt);
-  const finalText = style.uppercase ? params.text.toLocaleUpperCase() : params.text;
+  const finalText = displayTextForStyle(params.text, style);
   const logoMaxHeight = drawLogo && logo ? safePanel.height * (logo.maxHeightPercent / 100) : 0;
   const logoGap = logoMaxHeight ? 10 : 0;
   const textBoxHeight = safePanel.height - logoMaxHeight - logoGap;
+  const measureStyledText = (text: string, fontSize: number) =>
+    styledTextRuns(text, style).reduce((width, run) => width + textRenderer.measureText(run.text, fontSize * run.fontScale), 0);
   const fitted = fitTextToBox({
     text: finalText,
     maxWidth: safePanel.width,
@@ -160,7 +164,7 @@ function drawCenteredContent(params: {
     initialFontSize: style.fontSize,
     minFontSize: style.minFontSize,
     maxLines: style.maxLines,
-    measureText: textRenderer.measureText
+    measureText: measureStyledText
   });
   const blockHeight = fitted.lines.length * fitted.lineHeight + logoMaxHeight + logoGap;
   const startY = safePanel.y + (safePanel.height + blockHeight) / 2 - logoMaxHeight;
@@ -189,16 +193,23 @@ function drawCenteredContent(params: {
   }
 
   fitted.lines.forEach((line, index) => {
-    const width = textRenderer.measureText(line, fitted.fontSize);
+    const width = measureStyledText(line, fitted.fontSize);
     const y = startY - logoGap - logoMaxHeight - fitted.lineHeight * (index + 1);
-    const x = textX(safePanel, width);
-    textRenderer.drawLine({
-      page,
-      text: line,
-      x,
-      y,
-      fontSize: fitted.fontSize,
-      color: textColorToPdfCmyk(style.color)
+    let runX = textX(safePanel, width);
+    const color = textColorToPdfCmyk(style.color);
+
+    styledTextRuns(line, style).forEach((run) => {
+      const runFontSize = fitted.fontSize * run.fontScale;
+
+      textRenderer.drawLine({
+        page,
+        text: run.text,
+        x: runX,
+        y,
+        fontSize: runFontSize,
+        color
+      });
+      runX += textRenderer.measureText(run.text, runFontSize);
     });
   });
 
