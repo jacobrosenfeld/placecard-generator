@@ -12,6 +12,9 @@ export function validateSettings(settings: ProjectSettings): string[] {
   if (settings.includeLogo && settings.logo) {
     warnings.push(...settings.logo.warnings);
   }
+  if (settings.nameText.fontMode === "google" || settings.tableText.fontMode === "google") {
+    warnings.push("Google Fonts override is used in previews; print PDFs currently use the nearest curated PDF font.");
+  }
   return warnings;
 }
 

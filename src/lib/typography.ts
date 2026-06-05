@@ -1,0 +1,83 @@
+import { StandardFonts, rgb } from "pdf-lib";
+import type { RGB } from "pdf-lib";
+import type { TextStyle } from "@/types/placecard";
+
+export type CuratedFont = {
+  id: string;
+  label: string;
+  cssFamily: string;
+  pdfRegular: StandardFonts;
+  pdfBold: StandardFonts;
+};
+
+export const CURATED_FONTS: CuratedFont[] = [
+  {
+    id: "classic-serif",
+    label: "Classic Serif",
+    cssFamily: "Georgia, 'Times New Roman', serif",
+    pdfRegular: StandardFonts.TimesRoman,
+    pdfBold: StandardFonts.TimesRomanBold
+  },
+  {
+    id: "modern-sans",
+    label: "Modern Sans",
+    cssFamily: "Helvetica, Arial, sans-serif",
+    pdfRegular: StandardFonts.Helvetica,
+    pdfBold: StandardFonts.HelveticaBold
+  },
+  {
+    id: "formal-serif",
+    label: "Formal Serif",
+    cssFamily: "'Times New Roman', Times, serif",
+    pdfRegular: StandardFonts.TimesRoman,
+    pdfBold: StandardFonts.TimesRomanBold
+  },
+  {
+    id: "production-mono",
+    label: "Production Mono",
+    cssFamily: "'Courier New', Courier, monospace",
+    pdfRegular: StandardFonts.Courier,
+    pdfBold: StandardFonts.CourierBold
+  }
+];
+
+export function getCuratedFont(fontFamily: string): CuratedFont {
+  return CURATED_FONTS.find((font) => font.id === fontFamily) || CURATED_FONTS[0];
+}
+
+export function parseGoogleFontOverride(value: string): { family: string; weight?: string } {
+  const cleaned = value.trim();
+  const [family, weight] = cleaned.split("@").map((part) => part.trim());
+  return {
+    family: family || "Cormorant Garamond",
+    weight: weight || undefined
+  };
+}
+
+export function googleFontCssFamily(value: string): string {
+  const { family } = parseGoogleFontOverride(value);
+  return `"${family}", ${getCuratedFont("classic-serif").cssFamily}`;
+}
+
+export function styleCssFontFamily(style: TextStyle): string {
+  if (style.fontMode === "google") return googleFontCssFamily(style.googleFontFamily);
+  return getCuratedFont(style.fontFamily).cssFamily;
+}
+
+export function googleFontsHref(value: string): string {
+  const { family, weight } = parseGoogleFontOverride(value);
+  const encodedFamily = family.replace(/\s+/g, "+");
+  const weightParam = weight ? `:wght@${encodeURIComponent(weight)}` : "";
+  return `https://fonts.googleapis.com/css2?family=${encodedFamily}${weightParam}&display=swap`;
+}
+
+export function hexToPdfRgb(value: string): RGB {
+  const match = /^#?([a-f\d]{2})([a-f\d]{2})([a-f\d]{2})$/i.exec(value.trim());
+  if (!match) return rgb(0.12, 0.13, 0.14);
+
+  return rgb(
+    Number.parseInt(match[1], 16) / 255,
+    Number.parseInt(match[2], 16) / 255,
+    Number.parseInt(match[3], 16) / 255
+  );
+}

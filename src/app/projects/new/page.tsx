@@ -26,22 +26,28 @@ const defaultSettings: ProjectSettings = {
   outputMode: "single-up",
   includeLogo: false,
   nameText: {
-    fontFamily: "Times Roman",
+    fontFamily: "classic-serif",
+    fontMode: "curated",
+    googleFontFamily: "Cormorant Garamond@600",
     fontSize: 30,
     minFontSize: 12,
     fontWeight: "bold",
     align: "center",
     uppercase: false,
-    maxLines: 2
+    maxLines: 2,
+    color: "#202124"
   },
   tableText: {
-    fontFamily: "Times Roman",
+    fontFamily: "classic-serif",
+    fontMode: "curated",
+    googleFontFamily: "Cormorant Garamond@400",
     fontSize: 18,
     minFontSize: 10,
     fontWeight: "normal",
     align: "center",
     uppercase: false,
-    maxLines: 1
+    maxLines: 1,
+    color: "#202124"
   }
 };
 

@@ -1,6 +1,7 @@
 "use client";
 
 import type { CardLayout, GuestRow, ProjectSettings } from "@/types/placecard";
+import { styleCssFontFamily } from "@/lib/typography";
 
 export function CardPreview2D({
   layout,
@@ -33,6 +34,8 @@ export function CardPreview2D({
             showLogo={settings.logo?.placement === "above-name" || settings.logo?.placement === "both-panels"}
             fontSize={settings.nameText.fontSize}
             weight={settings.nameText.fontWeight}
+            fontFamily={styleCssFontFamily(settings.nameText)}
+            color={settings.nameText.color}
           />
           <PanelPreview
             text={guest?.tableLabel || "Table 12"}
@@ -40,6 +43,8 @@ export function CardPreview2D({
             showLogo={settings.logo?.placement === "above-table"}
             fontSize={settings.tableText.fontSize}
             weight={settings.tableText.fontWeight}
+            fontFamily={styleCssFontFamily(settings.tableText)}
+            color={settings.tableText.color}
           />
         </div>
       </div>
@@ -53,6 +58,8 @@ function PanelPreview({
   showLogo,
   fontSize,
   weight,
+  fontFamily,
+  color,
   className = ""
 }: {
   text: string;
@@ -60,6 +67,8 @@ function PanelPreview({
   showLogo?: boolean;
   fontSize: number;
   weight: "normal" | "bold";
+  fontFamily: string;
+  color: string;
   className?: string;
 }) {
   return (
@@ -70,7 +79,12 @@ function PanelPreview({
       ) : null}
       <div
         className="max-w-full overflow-hidden text-balance leading-tight"
-        style={{ fontSize: `${Math.min(fontSize, 34)}px`, fontWeight: weight }}
+        style={{
+          color,
+          fontFamily,
+          fontSize: `${Math.min(fontSize, 34)}px`,
+          fontWeight: weight
+        }}
       >
         {text}
       </div>

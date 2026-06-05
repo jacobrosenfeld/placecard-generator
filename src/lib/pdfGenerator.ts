@@ -2,6 +2,7 @@ import { PDFDocument, StandardFonts, rgb, degrees } from "pdf-lib";
 import type { CardLayout, GuestRow, LogoSettings, OutputMode, ProjectSettings, Rect, TextStyle } from "@/types/placecard";
 import { buildCardLayout, insetRect } from "./layoutEngine";
 import { fitTextToBox } from "./textFit";
+import { getCuratedFont, hexToPdfRgb } from "./typography";
 
 type GeneratePdfInput = {
   settings: ProjectSettings;
@@ -40,15 +41,14 @@ function drawCenteredContent(params: {
   text: string;
   style: TextStyle;
   font: Awaited<ReturnType<PDFDocument["embedFont"]>>;
-  boldFont: Awaited<ReturnType<PDFDocument["embedFont"]>>;
   rotation: 0 | 180;
   logoImage?: Awaited<ReturnType<typeof embedLogo>>;
   logo?: LogoSettings;
   drawLogo: boolean;
 }) {
-  const { page, panel, layout, style, font, boldFont, rotation, logoImage, logo, drawLogo } = params;
+  const { page, panel, layout, style, font, rotation, logoImage, logo, drawLogo } = params;
   const safePanel = insetRect(panel, layout.safeMarginPt);
-  const activeFont = style.fontWeight === "bold" ? boldFont : font;
+  const activeFont = font;
   const finalText = style.uppercase ? params.text.toLocaleUpperCase() : params.text;
   const logoMaxHeight = drawLogo && logo ? safePanel.height * (logo.maxHeightPercent / 100) : 0;
   const logoGap = logoMaxHeight ? 10 : 0;
@@ -95,10 +95,17 @@ function drawCenteredContent(params: {
       y: rotation === 180 ? centerY * 2 - y - fitted.fontSize : y,
       size: fitted.fontSize,
       font: activeFont,
-      color: rgb(0.12, 0.13, 0.14),
+      color: hexToPdfRgb(style.color),
       rotate
     });
   });
+}
+
+async function embedStyleFont(pdfDoc: PDFDocument, style: TextStyle) {
+  const curatedFont = getCuratedFont(style.fontFamily);
+  const standardFont = style.fontWeight === "bold" ? curatedFont.pdfBold : curatedFont.pdfRegular;
+
+  return pdfDoc.embedFont(standardFont);
 }
 
 function drawProofGuides(page: ReturnType<PDFDocument["addPage"]>, layout: CardLayout) {
@@ -127,7 +134,8 @@ export async function generatePlacecardPdf({ settings, guests, outputMode }: Gen
   const layout = buildCardLayout(settings);
   const pdfDoc = await PDFDocument.create();
   const regularFont = await pdfDoc.embedFont(StandardFonts.TimesRoman);
-  const boldFont = await pdfDoc.embedFont(StandardFonts.TimesRomanBold);
+  const nameFont = await embedStyleFont(pdfDoc, settings.nameText);
+  const tableFont = await embedStyleFont(pdfDoc, settings.tableText);
   const logoImage = await embedLogo(pdfDoc, settings.includeLogo ? settings.logo : undefined);
 
   guests.forEach((guest, index) => {
@@ -140,8 +148,7 @@ export async function generatePlacecardPdf({ settings, guests, outputMode }: Gen
       layout,
       text: guest.name,
       style: settings.nameText,
-      font: regularFont,
-      boldFont,
+      font: nameFont,
       rotation: 180,
       logoImage,
       logo: settings.logo,
@@ -154,8 +161,7 @@ export async function generatePlacecardPdf({ settings, guests, outputMode }: Gen
       layout,
       text: guest.tableLabel,
       style: settings.tableText,
-      font: regularFont,
-      boldFont,
+      font: tableFont,
       rotation: 0,
       logoImage,
       logo: settings.logo,

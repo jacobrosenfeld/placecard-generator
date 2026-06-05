@@ -40,27 +40,44 @@ select {
 }
 
 .card3d[data-state="folded"] {
-  transform: rotateX(58deg) rotateZ(-4deg);
+  transform: rotateX(62deg) rotateZ(-4deg) translateY(22px);
 }
 
 .card3d[data-state="rotating"] {
-  transform: rotateX(58deg) rotateY(180deg) rotateZ(4deg);
+  transform: rotateX(62deg) rotateY(180deg) rotateZ(4deg) translateY(22px);
 }
 
 .card3d[data-state="open"] {
-  transform: rotateX(35deg);
+  transform: rotateX(38deg) translateY(10px);
 }
 
 .card3d-panel {
   backface-visibility: visible;
+  transform-style: preserve-3d;
+}
+
+.card3d-top {
   transform-origin: center bottom;
+}
+
+.card3d-bottom {
+  transform-origin: center top;
 }
 
 .card3d[data-state="folded"] .card3d-top,
 .card3d[data-state="rotating"] .card3d-top {
-  transform: rotateX(-112deg);
+  transform: translateY(100%) rotateX(-104deg);
 }
 
 .card3d[data-state="open"] .card3d-top {
-  transform: rotateX(-48deg);
+  transform: translateY(100%) rotateX(-52deg);
+}
+
+.card3d[data-state="folded"] .card3d-bottom,
+.card3d[data-state="rotating"] .card3d-bottom {
+  transform: rotateX(18deg);
+}
+
+.card3d[data-state="open"] .card3d-bottom {
+  transform: rotateX(8deg);
 }
