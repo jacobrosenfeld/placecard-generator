@@ -153,78 +153,50 @@ function TextColorControl({
     });
   }
 
-  function channelGradient(channel: "c" | "m" | "y" | "k") {
-    return `linear-gradient(90deg, ${textColorToPreviewHex({
-      mode: "cmyk",
-      ...cmykChannels,
-      [channel]: 0
-    })}, ${textColorToPreviewHex({
-      mode: "cmyk",
-      ...cmykChannels,
-      [channel]: 100
-    })})`;
-  }
-
   return (
     <div className="grid gap-2">
-      <div className="grid grid-cols-[48px_1fr] gap-2">
+      <div className="flex items-center gap-2">
         <span
           aria-label={`${label} text color preview`}
-          className="h-10 w-12 rounded-md border border-line"
+          className="h-10 w-12 shrink-0 rounded-md border border-line"
           style={{ backgroundColor: previewHex }}
         />
-        <div className="flex flex-wrap gap-2">
-          {CMYK_COLOR_PRESETS.map((preset) => (
-            <button
-              key={preset.id}
-              type="button"
-              className="inline-flex h-10 items-center gap-2 rounded-md border border-line bg-white px-3 text-xs font-semibold text-ink transition hover:border-forest"
-              onClick={() => onChange({ ...style, color: preset.color })}
-            >
-              <span
-                aria-hidden="true"
-                className="h-4 w-4 rounded-sm border border-line"
-                style={{ backgroundColor: textColorToPreviewHex(preset.color) }}
-              />
-              {preset.label}
-            </button>
-          ))}
-        </div>
+        <span className="text-xs font-semibold uppercase tracking-wide text-neutral-500">Current CMYK</span>
       </div>
 
-      <div className="grid gap-3">
+      <div className="flex flex-wrap gap-2">
+        {CMYK_COLOR_PRESETS.map((preset) => (
+          <button
+            key={preset.id}
+            type="button"
+            className="inline-flex h-10 items-center gap-2 rounded-md border border-line bg-white px-3 text-xs font-semibold text-ink transition hover:border-forest"
+            onClick={() => onChange({ ...style, color: preset.color })}
+          >
+            <span
+              aria-hidden="true"
+              className="h-4 w-4 rounded-sm border border-line"
+              style={{ backgroundColor: textColorToPreviewHex(preset.color) }}
+            />
+            {preset.label}
+          </button>
+        ))}
+      </div>
+
+      <div className="grid grid-cols-4 gap-2">
         {(["c", "m", "y", "k"] as const).map((channel) => (
-          <div key={channel} className="grid gap-1.5">
-            <div className="grid grid-cols-[22px_1fr_76px] items-center gap-2">
-              <span className="text-xs font-semibold uppercase text-neutral-600">{channel}</span>
-              <div
-                aria-hidden="true"
-                className="h-2 rounded-full border border-line"
-                style={{ background: channelGradient(channel) }}
-              />
-              <input
-                aria-label={`${label} ${channel.toUpperCase()} CMYK value`}
-                className={controlClass}
-                type="number"
-                min="0"
-                max="100"
-                step="0.1"
-                value={cmykChannels[channel]}
-                onChange={(event) => updateCmyk(channel, Number(event.target.value))}
-              />
-            </div>
+          <label key={channel} className="grid gap-1 text-xs font-semibold uppercase text-neutral-600">
+            {channel}
             <input
-              aria-label={`${label} ${channel.toUpperCase()} CMYK slider`}
-              className="w-full cursor-pointer"
-              type="range"
+              aria-label={`${label} ${channel.toUpperCase()} CMYK value`}
+              className={controlClass}
+              type="number"
               min="0"
               max="100"
               step="0.1"
               value={cmykChannels[channel]}
               onChange={(event) => updateCmyk(channel, Number(event.target.value))}
-              style={{ accentColor: previewHex }}
             />
-          </div>
+          </label>
         ))}
       </div>
     </div>
