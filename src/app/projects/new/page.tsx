@@ -27,9 +27,7 @@ const defaultSettings: ProjectSettings = {
   outputMode: "single-up",
   includeLogo: false,
   nameText: {
-    fontFamily: "classic-serif",
-    fontMode: "curated",
-    googleFontFamily: "Cormorant Garamond@600",
+    fontFamily: "eb-garamond",
     fontSize: 30,
     minFontSize: 12,
     fontWeight: "bold",
@@ -39,9 +37,7 @@ const defaultSettings: ProjectSettings = {
     color: "#202124"
   },
   tableText: {
-    fontFamily: "classic-serif",
-    fontMode: "curated",
-    googleFontFamily: "Cormorant Garamond@400",
+    fontFamily: "open-sans",
     fontSize: 18,
     minFontSize: 10,
     fontWeight: "normal",

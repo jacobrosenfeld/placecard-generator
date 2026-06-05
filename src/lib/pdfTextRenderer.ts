@@ -2,7 +2,7 @@ import { StandardFonts } from "pdf-lib";
 import type { Color, PDFDocument, PDFFont, PDFPage } from "pdf-lib";
 import fontkit from "@pdf-lib/fontkit";
 import type { TextStyle } from "@/types/placecard";
-import { fetchCuratedFontBytes, fetchGoogleFontBytes, getCuratedFont } from "./typography";
+import { fetchCuratedFontBytes, getCuratedFont, normalizeFontWeight } from "./typography";
 
 type GlyphPosition = {
   xAdvance: number;
@@ -27,6 +27,10 @@ type FontkitFont = {
     glyphs: Glyph[];
     positions: GlyphPosition[];
   };
+};
+
+type OutlineTextRendererOptions = {
+  syntheticBold?: boolean;
 };
 
 export type PdfTextRenderer = {
@@ -75,7 +79,7 @@ export function fontPathToPdfLibSvgPath(path: NonNullable<Glyph["path"]>): strin
     .join("");
 }
 
-export function createOutlineTextRenderer(fontBytes: Uint8Array): PdfTextRenderer {
+export function createOutlineTextRenderer(fontBytes: Uint8Array, options: OutlineTextRendererOptions = {}): PdfTextRenderer {
   const font = fontkit.create(fontBytes) as FontkitFont;
 
   function measureText(text: string, fontSize: number): number {
@@ -97,12 +101,24 @@ export function createOutlineTextRenderer(fontBytes: Uint8Array): PdfTextRendere
         const path = glyph.path ? fontPathToPdfLibSvgPath(glyph.path) : undefined;
 
         if (path) {
+          const drawX = x + (cursorX + (position.xOffset || 0)) * scale;
+          const drawY = y + (position.yOffset || 0) * scale;
+
           page.drawSvgPath(path, {
-            x: x + (cursorX + (position.xOffset || 0)) * scale,
-            y: y + (position.yOffset || 0) * scale,
+            x: drawX,
+            y: drawY,
             scale,
             color
           });
+
+          if (options.syntheticBold) {
+            page.drawSvgPath(path, {
+              x: drawX + Math.max(fontSize * 0.012, 0.25),
+              y: drawY,
+              scale,
+              color
+            });
+          }
         }
 
         cursorX += position.xAdvance;
@@ -112,23 +128,17 @@ export function createOutlineTextRenderer(fontBytes: Uint8Array): PdfTextRendere
 }
 
 export async function createTextRenderer(pdfDoc: PDFDocument, style: TextStyle): Promise<PdfTextRenderer> {
-  if (style.fontMode === "google") {
-    try {
-      const fontBytes = await fetchGoogleFontBytes(style.googleFontFamily);
-      if (fontBytes) return createOutlineTextRenderer(fontBytes);
-    } catch {
-      // Fall back to a PDF-safe live text font if the remote font cannot be fetched or parsed.
-    }
-  }
-
   const curatedFont = getCuratedFont(style.fontFamily);
-  const curatedFontBytes = await fetchCuratedFontBytes(curatedFont);
+  const fontWeight = normalizeFontWeight(curatedFont.id, style.fontWeight);
+  const curatedFontBytes = await fetchCuratedFontBytes(curatedFont, fontWeight);
   if (curatedFontBytes) {
-    return createOutlineTextRenderer(curatedFontBytes);
+    return createOutlineTextRenderer(curatedFontBytes, {
+      syntheticBold: fontWeight === "bold" && curatedFont.syntheticBold
+    });
   }
 
-  const standardFont = style.fontWeight === "bold" ? curatedFont.pdfBold : curatedFont.pdfRegular;
-  const font = await pdfDoc.embedFont(standardFont || StandardFonts.TimesRoman);
+  const standardFont = fontWeight === "bold" ? StandardFonts.TimesRomanBold : StandardFonts.TimesRoman;
+  const font = await pdfDoc.embedFont(standardFont);
 
   return createStandardTextRenderer(font);
 }

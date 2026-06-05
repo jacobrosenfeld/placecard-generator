@@ -1,7 +1,7 @@
 "use client";
 
 import type { CardLayout, GuestRow, ProjectSettings } from "@/types/placecard";
-import { styleCssFontFamily } from "@/lib/typography";
+import { styleCssFontFamily, styleCssFontWeight } from "@/lib/typography";
 import { formatInchesFromPoints } from "@/lib/units";
 
 export function CardPreview2D({
@@ -40,6 +40,7 @@ export function CardPreview2D({
                 showLogo={settings.logo?.placement === "above-name" || settings.logo?.placement === "both-panels"}
                 fontSize={settings.nameText.fontSize}
                 weight={settings.nameText.fontWeight}
+                cssWeight={styleCssFontWeight(settings.nameText)}
                 fontFamily={styleCssFontFamily(settings.nameText)}
                 color={settings.nameText.color}
                 className="border-t border-dashed border-brass"
@@ -62,6 +63,7 @@ export function CardPreview2D({
                 showLogo={settings.logo?.placement === "above-table" || settings.logo?.placement === "both-panels"}
                 fontSize={settings.tableText.fontSize}
                 weight={settings.tableText.fontWeight}
+                cssWeight={styleCssFontWeight(settings.tableText)}
                 fontFamily={styleCssFontFamily(settings.tableText)}
                 color={settings.tableText.color}
                 className="rotate-180 border-b border-dashed border-brass"
@@ -89,6 +91,7 @@ function PanelPreview({
   showLogo,
   fontSize,
   weight,
+  cssWeight,
   fontFamily,
   color,
   className = ""
@@ -97,7 +100,8 @@ function PanelPreview({
   logo?: string;
   showLogo?: boolean;
   fontSize: number;
-  weight: "normal" | "bold";
+  weight: ProjectSettings["nameText"]["fontWeight"];
+  cssWeight: number;
   fontFamily: string;
   color: string;
   className?: string;
@@ -114,7 +118,8 @@ function PanelPreview({
           color,
           fontFamily,
           fontSize: `${Math.min(fontSize, 34)}px`,
-          fontWeight: weight
+          fontWeight: cssWeight,
+          WebkitTextStroke: weight === "bold" ? "0.2px currentColor" : undefined
         }}
       >
         {text}

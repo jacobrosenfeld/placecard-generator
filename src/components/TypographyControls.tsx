@@ -1,8 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
-import type { ProjectSettings, TextStyle } from "@/types/placecard";
-import { CURATED_FONTS, googleFontsHref } from "@/lib/typography";
+import type { FontWeight, ProjectSettings, TextStyle } from "@/types/placecard";
+import { availableFontWeights, CURATED_FONTS, FONT_WEIGHT_LABELS, normalizeFontWeight } from "@/lib/typography";
 import { controlClass, Field } from "./Field";
 
 function updateTextStyle(style: TextStyle, patch: Partial<TextStyle>): TextStyle {
@@ -16,20 +15,6 @@ export function TypographyControls({
   settings: ProjectSettings;
   onChange: (settings: ProjectSettings) => void;
 }) {
-  useEffect(() => {
-    const overrides = [settings.nameText, settings.tableText]
-      .filter((style) => style.fontMode === "google" && style.googleFontFamily.trim())
-      .map((style) => googleFontsHref(style.googleFontFamily));
-
-    for (const href of overrides) {
-      if (document.querySelector(`link[href="${href}"]`)) continue;
-      const link = document.createElement("link");
-      link.rel = "stylesheet";
-      link.href = href;
-      document.head.appendChild(link);
-    }
-  }, [settings.nameText, settings.tableText]);
-
   return (
     <section className="grid gap-4 border border-line bg-white p-4 shadow-tool">
       <h2 className="text-base font-semibold">Typography</h2>
@@ -37,18 +22,15 @@ export function TypographyControls({
         <Field label="Name font">
           <select
             className={controlClass}
-            value={settings.nameText.fontMode === "google" ? "google" : settings.nameText.fontFamily}
+            value={settings.nameText.fontFamily}
             onChange={(event) => {
-              if (event.target.value === "google") {
-                onChange({ ...settings, nameText: updateTextStyle(settings.nameText, { fontMode: "google" }) });
-                return;
-              }
+              const fontFamily = event.target.value;
 
               onChange({
                 ...settings,
                 nameText: updateTextStyle(settings.nameText, {
-                  fontMode: "curated",
-                  fontFamily: event.target.value
+                  fontFamily,
+                  fontWeight: normalizeFontWeight(fontFamily, settings.nameText.fontWeight)
                 })
               });
             }}
@@ -58,24 +40,20 @@ export function TypographyControls({
                 {font.label}
               </option>
             ))}
-            <option value="google">Google Fonts override</option>
           </select>
         </Field>
         <Field label="Table font">
           <select
             className={controlClass}
-            value={settings.tableText.fontMode === "google" ? "google" : settings.tableText.fontFamily}
+            value={settings.tableText.fontFamily}
             onChange={(event) => {
-              if (event.target.value === "google") {
-                onChange({ ...settings, tableText: updateTextStyle(settings.tableText, { fontMode: "google" }) });
-                return;
-              }
+              const fontFamily = event.target.value;
 
               onChange({
                 ...settings,
                 tableText: updateTextStyle(settings.tableText, {
-                  fontMode: "curated",
-                  fontFamily: event.target.value
+                  fontFamily,
+                  fontWeight: normalizeFontWeight(fontFamily, settings.tableText.fontWeight)
                 })
               });
             }}
@@ -85,27 +63,8 @@ export function TypographyControls({
                 {font.label}
               </option>
             ))}
-            <option value="google">Google Fonts override</option>
           </select>
         </Field>
-        {settings.nameText.fontMode === "google" ? (
-          <Field label="Name Google Font" hint="Use Family or Family@weight, for example Cormorant Garamond@600.">
-            <input
-              className={controlClass}
-              value={settings.nameText.googleFontFamily}
-              onChange={(event) => onChange({ ...settings, nameText: updateTextStyle(settings.nameText, { googleFontFamily: event.target.value }) })}
-            />
-          </Field>
-        ) : null}
-        {settings.tableText.fontMode === "google" ? (
-          <Field label="Table Google Font" hint="Use Family or Family@weight, for example Cormorant Garamond@400.">
-            <input
-              className={controlClass}
-              value={settings.tableText.googleFontFamily}
-              onChange={(event) => onChange({ ...settings, tableText: updateTextStyle(settings.tableText, { googleFontFamily: event.target.value }) })}
-            />
-          </Field>
-        ) : null}
         <Field label="Name size">
           <input className={controlClass} type="number" min="8" max="80" value={settings.nameText.fontSize} onChange={(event) => onChange({ ...settings, nameText: updateTextStyle(settings.nameText, { fontSize: Number(event.target.value) }) })} />
         </Field>
@@ -126,9 +85,21 @@ export function TypographyControls({
           <input className={controlClass} type="number" min="1" max="4" value={settings.nameText.maxLines} onChange={(event) => onChange({ ...settings, nameText: updateTextStyle(settings.nameText, { maxLines: Number(event.target.value) }) })} />
         </Field>
         <Field label="Name weight">
-          <select className={controlClass} value={settings.nameText.fontWeight} onChange={(event) => onChange({ ...settings, nameText: updateTextStyle(settings.nameText, { fontWeight: event.target.value as TextStyle["fontWeight"] }) })}>
-            <option value="normal">Normal</option>
-            <option value="bold">Bold</option>
+          <select className={controlClass} value={settings.nameText.fontWeight} onChange={(event) => onChange({ ...settings, nameText: updateTextStyle(settings.nameText, { fontWeight: event.target.value as FontWeight }) })}>
+            {availableFontWeights(settings.nameText.fontFamily).map((weight) => (
+              <option key={weight} value={weight}>
+                {FONT_WEIGHT_LABELS[weight]}
+              </option>
+            ))}
+          </select>
+        </Field>
+        <Field label="Table weight">
+          <select className={controlClass} value={settings.tableText.fontWeight} onChange={(event) => onChange({ ...settings, tableText: updateTextStyle(settings.tableText, { fontWeight: event.target.value as FontWeight }) })}>
+            {availableFontWeights(settings.tableText.fontFamily).map((weight) => (
+              <option key={weight} value={weight}>
+                {FONT_WEIGHT_LABELS[weight]}
+              </option>
+            ))}
           </select>
         </Field>
         <Field label="Alignment">

@@ -4,7 +4,7 @@ export type FoldType = "horizontal-tent" | "vertical-tent";
 
 export type OutputMode = "single-up" | "proof";
 
-export type FontMode = "curated" | "google";
+export type FontWeight = "light" | "normal" | "bold";
 
 export type Rect = {
   x: number;
@@ -27,11 +27,9 @@ export type CardLayout = {
 
 export type TextStyle = {
   fontFamily: string;
-  fontMode: FontMode;
-  googleFontFamily: string;
   fontSize: number;
   minFontSize: number;
-  fontWeight: "normal" | "bold";
+  fontWeight: FontWeight;
   align: "left" | "center" | "right";
   uppercase: boolean;
   maxLines: number;

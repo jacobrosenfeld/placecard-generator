@@ -1,131 +1,139 @@
-import { StandardFonts, rgb } from "pdf-lib";
+import { rgb } from "pdf-lib";
 import type { RGB } from "pdf-lib";
-import type { TextStyle } from "@/types/placecard";
+import type { FontWeight, TextStyle } from "@/types/placecard";
 
 export type CuratedFont = {
   id: string;
   label: string;
   cssFamily: string;
-  pdfRegular?: StandardFonts;
-  pdfBold?: StandardFonts;
-  fontFileUrl?: string;
+  weights: FontWeight[];
+  fontFileUrls: Partial<Record<FontWeight, string>>;
+  syntheticBold?: boolean;
+};
+
+export const FONT_WEIGHT_LABELS: Record<FontWeight, string> = {
+  light: "Light",
+  normal: "Regular",
+  bold: "Bold"
+};
+
+export const FONT_WEIGHT_VALUES: Record<FontWeight, number> = {
+  light: 300,
+  normal: 400,
+  bold: 700
 };
 
 export const CURATED_FONTS: CuratedFont[] = [
   {
-    id: "classic-serif",
-    label: "Classic Serif",
-    cssFamily: "Georgia, 'Times New Roman', serif",
-    pdfRegular: StandardFonts.TimesRoman,
-    pdfBold: StandardFonts.TimesRomanBold
+    id: "eb-garamond",
+    label: "EB Garamond",
+    cssFamily: "'EB Garamond', Garamond, Georgia, serif",
+    weights: ["normal", "bold"],
+    fontFileUrls: {
+      normal: "/fonts/eb-garamond-regular.ttf",
+      bold: "/fonts/eb-garamond-bold.ttf"
+    }
   },
   {
-    id: "modern-sans",
-    label: "Modern Sans",
-    cssFamily: "Helvetica, Arial, sans-serif",
-    pdfRegular: StandardFonts.Helvetica,
-    pdfBold: StandardFonts.HelveticaBold
+    id: "crimson-text",
+    label: "Crimson Text",
+    cssFamily: "'Crimson Text', Georgia, serif",
+    weights: ["normal", "bold"],
+    fontFileUrls: {
+      normal: "/fonts/crimson-text-regular.ttf",
+      bold: "/fonts/crimson-text-bold.ttf"
+    }
   },
   {
-    id: "formal-serif",
-    label: "Formal Serif",
-    cssFamily: "'Times New Roman', Times, serif",
-    pdfRegular: StandardFonts.TimesRoman,
-    pdfBold: StandardFonts.TimesRomanBold
+    id: "open-sans",
+    label: "Open Sans",
+    cssFamily: "'Open Sans', Arial, sans-serif",
+    weights: ["light", "normal", "bold"],
+    fontFileUrls: {
+      light: "/fonts/open-sans-light.ttf",
+      normal: "/fonts/open-sans-regular.ttf",
+      bold: "/fonts/open-sans-bold.ttf"
+    }
   },
   {
-    id: "production-mono",
-    label: "Production Mono",
-    cssFamily: "'Courier New', Courier, monospace",
-    pdfRegular: StandardFonts.Courier,
-    pdfBold: StandardFonts.CourierBold
-  },
-  {
-    id: "script-pinyon",
+    id: "pinyon-script",
     label: "Pinyon Script",
     cssFamily: "'Pinyon Script', cursive",
-    fontFileUrl: "/fonts/pinyon-script.ttf"
+    weights: ["normal", "bold"],
+    fontFileUrls: {
+      normal: "/fonts/pinyon-script.ttf",
+      bold: "/fonts/pinyon-script.ttf"
+    },
+    syntheticBold: true
+  },
+  {
+    id: "imperial-script",
+    label: "Imperial Script",
+    cssFamily: "'Imperial Script', cursive",
+    weights: ["normal", "bold"],
+    fontFileUrls: {
+      normal: "/fonts/imperial-script.ttf",
+      bold: "/fonts/imperial-script.ttf"
+    },
+    syntheticBold: true
+  },
+  {
+    id: "forum",
+    label: "Forum",
+    cssFamily: "'Forum', Georgia, serif",
+    weights: ["normal", "bold"],
+    fontFileUrls: {
+      normal: "/fonts/forum.ttf",
+      bold: "/fonts/forum.ttf"
+    },
+    syntheticBold: true
+  },
+  {
+    id: "niconne",
+    label: "Niconne",
+    cssFamily: "'Niconne', cursive",
+    weights: ["normal", "bold"],
+    fontFileUrls: {
+      normal: "/fonts/niconne.ttf",
+      bold: "/fonts/niconne.ttf"
+    },
+    syntheticBold: true
   }
 ];
-
-export const GOOGLE_FONTS_PDF_HEADERS = {
-  Accept: "text/css",
-  "User-Agent":
-    "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0 Safari/537.36"
-};
 
 export function getCuratedFont(fontFamily: string): CuratedFont {
   return CURATED_FONTS.find((font) => font.id === fontFamily) || CURATED_FONTS[0];
 }
 
-export function parseGoogleFontOverride(value: string): { family: string; weight?: string } {
-  const cleaned = value.trim();
-  const [family, weight] = cleaned.split("@").map((part) => part.trim());
-  return {
-    family: family || "Cormorant Garamond",
-    weight: weight || undefined
-  };
+export function availableFontWeights(fontFamily: string): FontWeight[] {
+  return getCuratedFont(fontFamily).weights;
 }
 
-export function googleFontCssFamily(value: string): string {
-  const { family } = parseGoogleFontOverride(value);
-  return `"${family}", ${getCuratedFont("classic-serif").cssFamily}`;
+export function normalizeFontWeight(fontFamily: string, fontWeight: FontWeight): FontWeight {
+  const weights = availableFontWeights(fontFamily);
+  return weights.includes(fontWeight) ? fontWeight : "normal";
 }
 
 export function styleCssFontFamily(style: TextStyle): string {
-  if (style.fontMode === "google") return googleFontCssFamily(style.googleFontFamily);
   return getCuratedFont(style.fontFamily).cssFamily;
 }
 
-export function googleFontsHref(value: string): string {
-  const { family, weight } = parseGoogleFontOverride(value);
-  const encodedFamily = family.replace(/\s+/g, "+");
-  const weightParam = weight ? `:wght@${encodeURIComponent(weight)}` : "";
-  return `https://fonts.googleapis.com/css2?family=${encodedFamily}${weightParam}&display=swap`;
+export function styleCssFontWeight(style: TextStyle): number {
+  return FONT_WEIGHT_VALUES[normalizeFontWeight(style.fontFamily, style.fontWeight)];
 }
 
-export function googleFontsPdfHref(value: string): string {
-  const { family, weight } = parseGoogleFontOverride(value);
-  const encodedFamily = family.replace(/\s+/g, "+");
-  const weightParam = weight ? `:${encodeURIComponent(weight)}` : "";
-  return `https://fonts.googleapis.com/css?family=${encodedFamily}${weightParam}`;
-}
+export async function fetchCuratedFontBytes(font: CuratedFont, fontWeight: FontWeight): Promise<Uint8Array | undefined> {
+  const normalizedWeight = normalizeFontWeight(font.id, fontWeight);
+  const fontFileUrl = font.fontFileUrls[normalizedWeight] || font.fontFileUrls.normal;
+  if (!fontFileUrl) return undefined;
 
-export function extractGoogleFontUrl(css: string): string | undefined {
-  const preferredFormatMatch = css.match(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)\s*format\('(truetype|opentype)'\)/);
-  if (preferredFormatMatch?.[1]) return preferredFormatMatch[1];
-
-  return css.match(/url\((https:\/\/fonts\.gstatic\.com\/[^)]+)\)/)?.[1];
-}
-
-export async function fetchGoogleFontBytes(value: string): Promise<Uint8Array | undefined> {
-  if (typeof window !== "undefined") {
-    const response = await fetch(`/api/google-font?font=${encodeURIComponent(value)}`);
-    if (!response.ok) return undefined;
-
-    return new Uint8Array(await response.arrayBuffer());
+  let response: Response;
+  try {
+    response = await fetch(fontFileUrl);
+  } catch {
+    return undefined;
   }
 
-  const cssResponse = await fetch(googleFontsPdfHref(value), {
-    headers: GOOGLE_FONTS_PDF_HEADERS
-  });
-  if (!cssResponse.ok) return undefined;
-
-  const css = await cssResponse.text();
-  const fontUrl = extractGoogleFontUrl(css);
-  if (!fontUrl) return undefined;
-
-  const fontResponse = await fetch(fontUrl);
-  if (!fontResponse.ok) return undefined;
-
-  return new Uint8Array(await fontResponse.arrayBuffer());
-}
-
-export async function fetchCuratedFontBytes(font: CuratedFont): Promise<Uint8Array | undefined> {
-  if (!font.fontFileUrl) return undefined;
-  if (typeof window === "undefined" && font.fontFileUrl.startsWith("/")) return undefined;
-
-  const response = await fetch(font.fontFileUrl);
   if (!response.ok) return undefined;
 
   return new Uint8Array(await response.arrayBuffer());

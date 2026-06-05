@@ -1,7 +1,7 @@
 "use client";
 
 import type { GuestRow, ProjectSettings } from "@/types/placecard";
-import { styleCssFontFamily } from "@/lib/typography";
+import { styleCssFontFamily, styleCssFontWeight } from "@/lib/typography";
 
 export type PreviewState = "flat" | "folded" | "rotating" | "open";
 
@@ -20,12 +20,14 @@ export function CardPreview3D({
   const nameStyle = {
     color: settings.nameText.color,
     fontFamily: styleCssFontFamily(settings.nameText),
-    fontWeight: settings.nameText.fontWeight
+    fontWeight: styleCssFontWeight(settings.nameText),
+    WebkitTextStroke: settings.nameText.fontWeight === "bold" ? "0.2px currentColor" : undefined
   };
   const tableStyle = {
     color: settings.tableText.color,
     fontFamily: styleCssFontFamily(settings.tableText),
-    fontWeight: settings.tableText.fontWeight
+    fontWeight: styleCssFontWeight(settings.tableText),
+    WebkitTextStroke: settings.tableText.fontWeight === "bold" ? "0.2px currentColor" : undefined
   };
 
   return (
